@@ -26,10 +26,10 @@ public class StatsController {
     }
 
     @GetMapping("/stats")
-    public List<HitGettingDto> getAll( @JsonFormat(pattern = TIME_PATTERN) LocalDateTime start,
-                                       @JsonFormat(pattern = TIME_PATTERN) LocalDateTime end,
-                                       List<String> uris,
-                                       boolean unique) {
+    public List<HitGettingDto> getAll(@JsonFormat(pattern = TIME_PATTERN) LocalDateTime start,
+                                      @JsonFormat(pattern = TIME_PATTERN) LocalDateTime end,
+                                      List<String> uris,
+                                      boolean unique) {
         return statsService.getAll(start, end, uris, unique);
     }
 }
