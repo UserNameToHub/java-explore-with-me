@@ -7,11 +7,11 @@ services:
     ports:
       - "9090:9090"
     depends_on:
-      - stats-server-service
+      - stats-server
     environment:
       - STATS_SERVER_URL=http://stats-server-service:9091
 
-  stats-server-service:
+  stats-server:
     build: stats-server/service
     image: stats-service-image
     container_name: stats-service
