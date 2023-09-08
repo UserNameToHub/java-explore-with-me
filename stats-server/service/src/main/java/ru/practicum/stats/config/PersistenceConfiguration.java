@@ -9,10 +9,10 @@ import javax.sql.DataSource;
 
 @Configuration
 public class PersistenceConfiguration {
-    public static final String H2_URL="jdbc:h2:mem:stats";
-    public static final String H2_USERNAME="qwerty";
-    public static final String H2_PASSWORD="qwerty";
-    public static final String H2_DRIVER="org.h2.Driver";
+    public static final String H2_URL = "jdbc:h2:mem:stats";
+    public static final String H2_USERNAME = "qwerty";
+    public static final String H2_PASSWORD = "qwerty";
+    public static final String H2_DRIVER = "org.h2.Driver";
 
     @Bean
     @Profile("test")
