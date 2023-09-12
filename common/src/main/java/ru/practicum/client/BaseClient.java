@@ -1,56 +1,55 @@
 package ru.practicum.client;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.lang.Nullable;
-import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
-@Slf4j
 public class BaseClient {
     protected final RestTemplate rest;
 
-    protected ResponseEntity<Object> get(String path, @Nullable Map<String, Object> parameters) {
-        return makeAndSendRequest(HttpMethod.GET, path, parameters, null);
+    protected <T> ResponseEntity<List<T>> get(String path, @Nullable Map<String, Object> parameters, Class<T> tClass) {
+        return makeAndSendRequest(HttpMethod.GET, path, parameters, null, new ParameterizedTypeReference<List<T>>() {
+        });
     }
 
-    protected <T> ResponseEntity<Object> post(String path, T body) {
-        return makeAndSendRequest(HttpMethod.POST, path, null, body);
+    protected <T1, T2> ResponseEntity<T2> post(String path, T1 body, Class<T2> tClass) {
+        return makeAndSendRequest(HttpMethod.POST, path, null, body, tClass);
     }
 
-    private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String, Object> parameters, @Nullable T body) {
-        HttpEntity<T> requestEntity = new HttpEntity<>(body, defaultHeaders());
+    private <T1, T2> ResponseEntity<T2> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String,
+            Object> parameters, @Nullable T1 body, Class<T2> tClass) {
+        HttpEntity<T1> requestEntity = new HttpEntity<>(body, defaultHeaders());
 
-        ResponseEntity<Object> serverResponse;
-        try {
-            if (parameters != null) {
-                serverResponse = rest.exchange(path, method, requestEntity, Object.class, parameters);
-            } else {
-                serverResponse = rest.exchange(path, method, requestEntity, Object.class);
-            }
-        } catch (HttpStatusCodeException e) {
-            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
+        ResponseEntity<T2> serverResponse;
+
+        if (parameters != null) {
+            serverResponse = rest.exchange(path, method, requestEntity, tClass, parameters);
+        } else {
+            serverResponse = rest.exchange(path, method, requestEntity, tClass);
         }
-        return prepareStatsResponse(serverResponse);
+
+        return serverResponse;
     }
 
-    private static ResponseEntity<Object> prepareStatsResponse(ResponseEntity<Object> response) {
-        if (response.getStatusCode().is2xxSuccessful()) {
-            return response;
+    private <T1, T2> ResponseEntity<List<T2>> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String,
+            Object> parameters, @Nullable T1 body, ParameterizedTypeReference<List<T2>> responseType) {
+        HttpEntity<T1> requestEntity = new HttpEntity<>(body, defaultHeaders());
+
+        ResponseEntity<List<T2>> serverResponse;
+
+        if (parameters != null) {
+            serverResponse = rest.exchange(path, method, requestEntity, responseType, parameters);
+        } else {
+            serverResponse = rest.exchange(path, method, requestEntity, responseType);
         }
 
-        ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(response.getStatusCode());
-
-        if (response.hasBody()) {
-            return responseBuilder.body(response.getBody());
-        }
-
-        return responseBuilder.build();
+        return serverResponse;
     }
 
     private HttpHeaders defaultHeaders() {

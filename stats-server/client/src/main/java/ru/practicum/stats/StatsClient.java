@@ -4,8 +4,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.client.BaseClient;
 import ru.practicum.commonDto.HitDto;
+import ru.practicum.commonDto.HitGettingDto;
 
-import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,24 +15,24 @@ public class StatsClient extends BaseClient {
         super(restTemplate);
     }
 
-    public ResponseEntity<Object> create(HitDto hitDto) {
-        return post("/hit", hitDto);
+    public ResponseEntity<String> create(HitDto hitDto) {
+        return post("/hit", hitDto, String.class);
     }
 
-    public ResponseEntity<Object> getAll(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
-        StringBuilder urisParam = new StringBuilder();
+    public ResponseEntity<List<HitGettingDto>> getAll(String start, String end, List<String> uris, boolean unique) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("start", start);
+        parameters.put("end", end);
+        parameters.put("unique", unique);
 
-        Map<String, Object> parameters = Map.of(
-                "start", start,
-                "end", end,
-                "uris", uris,
-                "unique", unique
-        );
+        String url = "/stats?start={start}&end={end}&unique{unique}";
 
-        uris.stream().forEach(uri -> {
-            urisParam.append("&uris=" + "{" + uri + "}");
-        });
+        if (uris != null) {
+            parameters.put("uris", uris);
+            url = "/stats?start={start}&end={end}&uris={uris}&unique{unique}";
 
-        return get("/stats?start={start}&end={end}" + urisParam + "&unique={unique}", parameters);
+        }
+
+        return get(url, parameters, HitGettingDto.class);
     }
 }
