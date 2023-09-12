@@ -2,14 +2,14 @@ package ru.practicum.stats;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.commonDto.HitDto;
+import ru.practicum.commonDto.HitGettingDto;
 import ru.practicum.stats.service.StatsService;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -18,17 +18,18 @@ import java.util.List;
 @Slf4j
 public class StatsController {
     private final StatsService statsService;
+    private final StatsClient statsClient;
 
     @PostMapping("/hit")
-    public ResponseEntity<Object> creat(@RequestBody @Valid HitDto shortHit) {
-        return statsService.create(shortHit);
+    public ResponseEntity<String> create(@RequestBody @Valid HitDto shortHit) {
+        return statsClient.create(statsService.create(shortHit));
     }
 
     @GetMapping("/stats")
-    public ResponseEntity<Object> getAll(@RequestParam LocalDateTime start,
-                                         @RequestParam LocalDateTime end,
-                                         @RequestParam List<String> uris,
-                                         @RequestParam(defaultValue = "false") boolean unique) {
-        return statsService.get(start, end, uris, unique);
+    public ResponseEntity<List<HitGettingDto>> getAll(@RequestParam String start,
+                                                      @RequestParam String end,
+                                                      @RequestParam(required = false) List<String> uris,
+                                                      @RequestParam(defaultValue = "false") boolean unique) {
+        return statsClient.getAll(start, end, uris, unique);
     }
 }

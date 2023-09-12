@@ -2,6 +2,7 @@ package ru.practicum.stats;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.commonDto.HitDto;
@@ -26,10 +27,10 @@ public class StatsController {
     }
 
     @GetMapping("/stats")
-    public List<HitGettingDto> getAll(@JsonFormat(pattern = TIME_PATTERN) LocalDateTime start,
-                                      @JsonFormat(pattern = TIME_PATTERN) LocalDateTime end,
-                                      List<String> uris,
-                                      boolean unique) {
+    public List<HitGettingDto> getAll(@RequestParam  @DateTimeFormat(pattern = TIME_PATTERN) LocalDateTime start,
+                                      @RequestParam @DateTimeFormat(pattern = TIME_PATTERN) LocalDateTime end,
+                                      @RequestParam(required = false)  List<String> uris,
+                                      @RequestParam(defaultValue = "false") boolean unique) {
         return statsService.getAll(start, end, uris, unique);
     }
 }
