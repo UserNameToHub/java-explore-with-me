@@ -30,7 +30,6 @@ public class HitDto {
     String ip;
 
     @NotNull(message = "Данное поле не может быть пустым.")
-    @FutureOrPresent
     @JsonFormat(pattern = TIME_PATTERN)
     LocalDateTime timestamp;
 }
