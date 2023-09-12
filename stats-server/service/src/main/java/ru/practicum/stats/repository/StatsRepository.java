@@ -21,4 +21,14 @@ public interface StatsRepository extends JpaRepository<EndpointHit, Integer> {
                                 @Param("end") LocalDateTime end,
                                 @Param("uris") Collection<String> uris,
                                 @Param("unique") boolean unique);
+
+    @Query("select new ru.practicum.commonDto.HitGettingDto(eh.app, " +
+            "eh.uri, " +
+            "case when :unique = true then count(distinct eh.ip) else count(eh.ip) end) " +
+            "from EndpointHit as eh " +
+            "where eh.timestamp between :start and :end " +
+            "group by eh.uri, eh.uri")
+    List<HitGettingDto> findAll(@Param("start") LocalDateTime start,
+                                @Param("end") LocalDateTime end,
+                                @Param("unique") boolean unique);
 }

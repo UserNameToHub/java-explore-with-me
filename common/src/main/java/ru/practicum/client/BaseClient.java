@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public class BaseClient {
+public abstract class BaseClient {
     protected final RestTemplate rest;
 
     protected <T> ResponseEntity<List<T>> get(String path, @Nullable Map<String, Object> parameters, Class<T> tClass) {
