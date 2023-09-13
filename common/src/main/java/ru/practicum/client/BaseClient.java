@@ -39,7 +39,7 @@ public abstract class BaseClient {
 
     private <T1, T2> ResponseEntity<List<T2>> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String,
             Object> parameters, @Nullable T1 body, ParameterizedTypeReference<List<T2>> responseType) {
-        HttpEntity<T1> requestEntity = new HttpEntity<>(body, defaultHeaders());
+        HttpEntity requestEntity = new HttpEntity<>(body, defaultHeaders());
 
         ResponseEntity<List<T2>> serverResponse;
 

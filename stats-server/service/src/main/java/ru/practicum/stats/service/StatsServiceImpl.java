@@ -10,7 +10,6 @@ import ru.practicum.stats.repository.StatsRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -27,9 +26,6 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public List<HitGettingDto> getAll(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
-        if (Objects.isNull(uris)) {
-            return repository.findAllStats(start, end, unique);
-        }
         return repository.findAllStats(start, end, uris, unique);
     }
 }
