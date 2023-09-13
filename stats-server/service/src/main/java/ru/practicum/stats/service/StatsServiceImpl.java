@@ -10,11 +10,12 @@ import ru.practicum.stats.repository.StatsRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class StetsServiceImpl implements StatsService {
+public class StatsServiceImpl implements StatsService {
     private final StatsRepository repository;
     private final HitMapper mapper;
 
@@ -26,6 +27,9 @@ public class StetsServiceImpl implements StatsService {
 
     @Override
     public List<HitGettingDto> getAll(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
-        return repository.findAll(start, end, uris, unique);
+        if (Objects.isNull(uris)) {
+            return repository.findAllStats(start, end, unique);
+        }
+        return repository.findAllStats(start, end, uris, unique);
     }
 }

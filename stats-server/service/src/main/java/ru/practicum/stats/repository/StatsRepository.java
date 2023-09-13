@@ -10,16 +10,27 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
-public interface StatsRepository extends JpaRepository<EndpointHit, Integer> {
+public interface StatsRepository extends JpaRepository<EndpointHit, Long> {
     @Query("select new ru.practicum.commonDto.HitGettingDto(eh.app, " +
             "eh.uri, " +
             "case when :unique = true then count(distinct eh.ip) else count(eh.ip) end) " +
             "from EndpointHit as eh " +
-            "where eh.timestamp between :start and :end and :uris is null or eh.uri in :uris " +
+            "where (eh.timestamp between :start and :end) and (eh.uri in :uris) " +
             "group by eh.app, eh.uri " +
             "order by 3 desc")
-    List<HitGettingDto> findAll(@Param("start") LocalDateTime start,
-                                @Param("end") LocalDateTime end,
-                                @Param("uris") Collection<String> uris,
-                                @Param("unique") boolean unique);
+    List<HitGettingDto> findAllStats(@Param("start") LocalDateTime start,
+                                     @Param("end") LocalDateTime end,
+                                     @Param("uris") Collection<String> uris,
+                                     @Param("unique") boolean unique);
+
+    @Query("select new ru.practicum.commonDto.HitGettingDto(eh.app, " +
+            "eh.uri, " +
+            "case when :unique = true then count(distinct eh.ip) else count(eh.ip) end) " +
+            "from EndpointHit as eh " +
+            "where eh.timestamp between :start and :end " +
+            "group by eh.app, eh.uri " +
+            "order by 3 desc")
+    List<HitGettingDto> findAllStats(@Param("start") LocalDateTime start,
+                                     @Param("end") LocalDateTime end,
+                                     @Param("unique") boolean unique);
 }

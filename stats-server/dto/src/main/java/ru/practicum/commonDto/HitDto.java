@@ -16,7 +16,7 @@ import static ru.practicum.util.Constatns.TIME_PATTERN;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class HitDto {
-    private Integer id;
+    private Long id;
 
     @NotBlank(message = "Данное поле не может быть пустым.")
     String app;
