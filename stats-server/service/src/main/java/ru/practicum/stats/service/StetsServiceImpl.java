@@ -27,9 +27,6 @@ public class StetsServiceImpl implements StatsService {
 
     @Override
     public List<HitGettingDto> getAll(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
-        if (Objects.isNull(uris)) {
-            return repository.findAll(start, end, unique);
-        }
         return repository.findAll(start, end, uris, unique);
     }
 }
