@@ -1,0 +1,5 @@
+server:
+  port: ${STATS_SERVER_PORT}
+
+stats-server:
+  url: ${STATS_SERVER_URL}
