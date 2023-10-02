@@ -1,8 +1,10 @@
 package ru.practicum.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.category.Dto.CategoryDto;
 import ru.practicum.common.enumiration.State;
 import ru.practicum.user.dto.UserShortDto;
@@ -11,10 +13,12 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-import static ru.practicum.util.Constatns.TIME_PATTERN;
+import static ru.practicum.util.Constants.TIME_PATTERN;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class EventFullDto {
     @NotBlank(message = "Данное поле не долно быть пустым.")
     private String annotation;
@@ -43,14 +47,12 @@ public class EventFullDto {
     @NotNull
     private Boolean paid;
 
-    @Builder.Default
-    private Integer participantLimit = 0;
+    private Integer participantLimit;
 
     @JsonFormat(pattern = TIME_PATTERN)
     private LocalDateTime publishedOn;
 
-    @Builder.Default
-    private Boolean requestModeration = true;
+    private Boolean requestModeration;
 
     private State state;
 

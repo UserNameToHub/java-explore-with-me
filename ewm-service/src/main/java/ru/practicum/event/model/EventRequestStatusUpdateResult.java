@@ -1,6 +1,7 @@
-package ru.practicum.request.dto;
+package ru.practicum.event.model;
 
 import lombok.Data;
+import ru.practicum.request.dto.ParticipationRequestDto;
 
 import javax.validation.Valid;
 import java.util.List;
