@@ -8,13 +8,13 @@ import ru.practicum.common.enumiration.State;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-import static ru.practicum.util.Constatns.TIME_PATTERN;
+import static ru.practicum.util.Constants.TIME_PATTERN;
 
 @Data
 @Builder
 public class ParticipationRequestDto {
-    @JsonFormat(pattern = TIME_PATTERN)
     @NotNull
+    @JsonFormat(pattern = TIME_PATTERN)
     private LocalDateTime created;
 
     @NotNull

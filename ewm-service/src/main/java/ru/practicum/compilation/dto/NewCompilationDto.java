@@ -5,12 +5,12 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
 public class NewCompilationDto {
-    private List<Integer> events;
+    private Set<Integer> events;
     private Boolean pinned;
 
     @NotBlank
