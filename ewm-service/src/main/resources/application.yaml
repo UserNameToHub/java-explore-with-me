@@ -1,0 +1,26 @@
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+        format_sql: true
+
+  sql:
+    init:
+      mode: always
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+
+server:
+  port: 8080
+
+#stats-server:
+#  url: http://stats-client:9091
+
+
+stats-server:
+  url: http://localhost:9091

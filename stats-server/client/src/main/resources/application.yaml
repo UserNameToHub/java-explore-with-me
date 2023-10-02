@@ -3,3 +3,10 @@ server:
 
 stats-server:
   url: ${STATS_SERVER_URL}
+
+
+#server:
+#  port: 9091
+#
+#stats-server:
+#  url: http://localhost:9090
