@@ -14,6 +14,14 @@ import static ru.practicum.util.Constants.TIME_PATTERN;
 
 @Slf4j
 public class CompareDateConstraintValidator implements ConstraintValidator<CompareDateConstraint, CompareDate> {
+    private LocalDateTime date;
+
+    @Override
+    public void initialize(CompareDateConstraint constraintAnnotation) {
+        log.debug("Инициализация поля date значением {}", constraintAnnotation.date());
+        this.date = LocalDateTime.parse(constraintAnnotation.date(), DateTimeFormatter.ofPattern(TIME_PATTERN));
+    }
+
     @Override
     public boolean isValid(CompareDate compareDate, ConstraintValidatorContext constraintValidatorContext) {
         return Objects.isNull(compareDate.getRangeStart()) || Objects.isNull(compareDate.getRangeStart()) ?

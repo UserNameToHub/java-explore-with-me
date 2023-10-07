@@ -28,6 +28,14 @@ public class ErrorException {
                 .body(apiErrorFactory.create(ex, status, "Incorrectly made request."));
     }
 
+    @ExceptionHandler(MyException.class)
+    protected ResponseEntity<?> handleException(MyException ex) {
+        log.warn("");
+        return ResponseEntity
+                .status(ex.getStatus())
+                .body(apiErrorFactory.create(ex, ex.getStatus(), ex.getReason()));
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     protected ResponseEntity<?> handleException(ConstraintViolationException ex) {
         HttpStatus status = HttpStatus.CONFLICT;

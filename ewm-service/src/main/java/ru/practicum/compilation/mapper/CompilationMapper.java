@@ -5,10 +5,13 @@ import org.springframework.stereotype.Component;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
 import ru.practicum.compilation.entity.Compilation;
+import ru.practicum.event.entity.Event;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.repository.EventRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -19,10 +22,11 @@ public class CompilationMapper {
     private final EventMapper eventMapper;
 
     public Compilation toEntity(NewCompilationDto newCompilationDto) {
-        var events = newCompilationDto.getEvents().stream()
+
+        var events = Objects.nonNull(newCompilationDto.getEvents()) ? newCompilationDto.getEvents().stream()
                 .map(eventRepository::findById)
                 .map(Optional::orElseThrow)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()) : new ArrayList<Event>();
 
 
         return Compilation.builder()

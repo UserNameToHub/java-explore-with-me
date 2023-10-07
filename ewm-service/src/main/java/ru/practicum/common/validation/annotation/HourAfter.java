@@ -1,6 +1,6 @@
 package ru.practicum.common.validation.annotation;
 
-import ru.practicum.common.validation.CreationDateConstraintValidator;
+import ru.practicum.common.validation.HourAfterValidator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -11,8 +11,8 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = CreationDateConstraintValidator.class)
-public @interface CreationDateConstraint {
+@Constraint(validatedBy = HourAfterValidator.class)
+public @interface HourAfter {
     String hour();
 
     String message() default "Должно содержать дату, которая еще не наступила.";

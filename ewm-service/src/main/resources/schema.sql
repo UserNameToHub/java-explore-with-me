@@ -1,5 +1,4 @@
--- drop table if exists users;
--- drop table if exists categories;
+-- drop table if exists compilations;
 -- drop table if exists events;
 
 create table if not exists users
@@ -24,9 +23,9 @@ create table if not exists locations
 
 create table if not exists compilations
 (
-    id       INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    pinned   BOOLEAN NOT NULL,
-    title    VARCHAR NOT NULL
+    id     INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    pinned BOOLEAN,
+    title  VARCHAR NOT NULL
 );
 
 create table if not exists events
@@ -39,9 +38,9 @@ create table if not exists events
     event_date         TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     user_id            INTEGER                     NOT NULL REFERENCES users (id),
     location_Id        INTEGER                     NOT NULL REFERENCES locations (id),
-    paid               BOOLEAN                     NOT NULL DEFAULT FALSE,
-    participant_limit  INTEGER                              DEFAULT 10,
-    request_moderation BOOLEAN                     NOT NULL DEFAULT TRUE,
+    paid               BOOLEAN DEFAULT FALSE,
+    participant_limit  INTEGER DEFAULT 10,
+    request_moderation BOOLEAN DEFAULT TRUE,
     published_on       TIMESTAMP WITHOUT TIME ZONE,
     state              VARCHAR,
     title              VARCHAR                     NOT NULL,
@@ -60,6 +59,6 @@ create table if not exists requests
 create table if not exists compilation_events
 (
     compilation_id INTEGER REFERENCES compilations (id) NOT NULL,
-    event_id       INTEGER REFERENCES events (id) NOT NULL,
+    event_id       INTEGER REFERENCES events (id)       NOT NULL,
     PRIMARY KEY (compilation_id, event_id)
 );

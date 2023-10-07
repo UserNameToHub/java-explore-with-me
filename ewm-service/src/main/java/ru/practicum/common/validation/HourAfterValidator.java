@@ -1,7 +1,7 @@
 package ru.practicum.common.validation;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.practicum.common.validation.annotation.CreationDateConstraint;
+import ru.practicum.common.validation.annotation.HourAfter;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 import static ru.practicum.util.Constants.TIME_PATTERN;
 
 @Slf4j
-public class CreationDateConstraintValidator implements ConstraintValidator<CreationDateConstraint, String> {
+public class HourAfterValidator implements ConstraintValidator<HourAfter, String> {
     private String hour;
 
     @Override
@@ -24,7 +24,7 @@ public class CreationDateConstraintValidator implements ConstraintValidator<Crea
     }
 
     @Override
-    public void initialize(CreationDateConstraint constraintAnnotation) {
+    public void initialize(HourAfter constraintAnnotation) {
         log.debug("Инициализация поля hour значением {}", constraintAnnotation.hour());
         hour = constraintAnnotation.hour();
     }

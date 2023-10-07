@@ -3,6 +3,7 @@ package ru.practicum.event.dto;
 import lombok.Builder;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
+import ru.practicum.common.validation.annotation.HourAfter;
 import ru.practicum.common.validation.validationGroup.Create;
 
 import javax.validation.constraints.*;
@@ -22,6 +23,7 @@ public class NewEventDto {
     private String description;
 
     @NotBlank
+    @HourAfter(hour = "2")
     private String eventDate;
 
     @NotNull

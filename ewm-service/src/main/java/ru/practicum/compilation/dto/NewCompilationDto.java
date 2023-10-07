@@ -2,6 +2,7 @@ package ru.practicum.compilation.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -14,6 +15,6 @@ public class NewCompilationDto {
     private Boolean pinned;
 
     @NotBlank
-    @Size(min = 1, max = 50)
+    @Length(min = 1, max = 50)
     private String title;
 }

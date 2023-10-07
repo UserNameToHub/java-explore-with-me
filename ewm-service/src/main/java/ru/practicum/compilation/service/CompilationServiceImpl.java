@@ -18,10 +18,7 @@ import ru.practicum.event.entity.Event;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.mapper.ModelMapper;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.util.Constants.ORDER_BY_ID_ASC;
@@ -57,10 +54,11 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationRepository.findById(compId).orElseThrow(() ->
                 new NotFoundException(String.format("Compilation with id=%d was not found", compId)));
 
-        var events = updateCompilation.getEvents().stream()
+        var events = Objects.nonNull(updateCompilation.getEvents()) ?
+                updateCompilation.getEvents().stream()
                 .map(eventRepository::findById)
                 .map(Optional::get)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()) : new ArrayList<Event>();
 
         ReflectionChange.go(compilation, updateCompilation);
         compilation.setEvents(events);

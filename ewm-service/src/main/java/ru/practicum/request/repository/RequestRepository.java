@@ -13,8 +13,6 @@ import ru.practicum.request.entity.Request;
 import java.util.List;
 
 public interface RequestRepository extends JpaRepository<Request, Integer> {
-    Boolean existsByRequesterIdAndEventId(Integer userId, Integer eventId);
-
     @Query("select r from Request as r " +
             "join r.event as e " +
             "where e.id = :eventId and r.id in :ids")

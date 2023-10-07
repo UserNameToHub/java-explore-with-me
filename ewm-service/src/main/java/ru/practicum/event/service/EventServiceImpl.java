@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.entity.Category;
@@ -11,16 +12,15 @@ import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.common.enumiration.State;
 import ru.practicum.common.enumiration.StateAction;
 import ru.practicum.common.exception.ConflictException;
+import ru.practicum.common.exception.MyException;
 import ru.practicum.common.exception.NotFoundException;
 import ru.practicum.common.util.ReflectionChange;
 import ru.practicum.event.StatsClient;
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.dto.HitGettingDto;
-import ru.practicum.event.dto.NewEventDto;
+import ru.practicum.event.dto.*;
 import ru.practicum.event.entity.Event;
 import ru.practicum.event.entity.Location;
 import ru.practicum.event.mapper.EventMapper;
+import ru.practicum.event.mapper.LocationMapper;
 import ru.practicum.event.model.EventRequestStatusUpdateRequest;
 import ru.practicum.event.model.EventRequestStatusUpdateResult;
 import ru.practicum.event.model.UpdateEventAdminRequest;
@@ -34,7 +34,6 @@ import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.user.entity.User;
 import ru.practicum.user.repository.UserRepository;
 
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -57,6 +56,7 @@ public class EventServiceImpl implements EventService {
     private final StatsClient statsClient;
     private final ModelMapper modelMapper;
     private final EventMapper eventMapper;
+    private final LocationMapper locationMapper;
 
 
     @Override
@@ -65,6 +65,10 @@ public class EventServiceImpl implements EventService {
                                        HttpServletRequest servletRequest) {
         List<Event> events = eventRepository.findAll(text, categories, paid,
                 rangeStart, rangeEnd, requestParam, PageRequest.of(from, size)).toList();
+
+        if (Objects.nonNull(rangeStart) && Objects.nonNull(rangeEnd) && rangeStart.isAfter(rangeEnd)) {
+            throw new MyException("Дата начала больше даты окончания", HttpStatus.BAD_REQUEST, "Incorrectly made request.");
+        }
 
         List<EventShortDto> eventShortDtos = eventMapper.toShortDtoList(events);
         List<String> uris = getUris(eventShortDtos);
@@ -149,7 +153,7 @@ public class EventServiceImpl implements EventService {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format("User with id=%d was not found", userId)));
         Location location = locationRepository.findByLatAndLon(event.getLocation().getLat(), event.getLocation().getLon())
-                .orElse(locationRepository.save(modelMapper.doMapping(event.getLocation(), Location.builder().build())));
+                    .orElse(locationRepository.save(locationMapper.toEntity(event.getLocation())));
 
         return eventMapper.toDto(eventRepository.save(eventMapper.toEntity(event, user, category, location)), 0, 0, location);
     }
@@ -160,9 +164,38 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException(String.format("Event with id=%d was not found", eventId)));
 
+//        if (event.getState().equals(State.PUBLISHED)) {
+//            throw new ConflictException("Only pending or canceled events can be changed");
+//        }
+//
+//        if (Objects.nonNull(adminRequest.getCategory())) {
+//            event.setCategory(categoryRepository.findById(adminRequest.getCategory()).orElseThrow(() ->
+//                    new NotFoundException(String.format("Category with id=%d was not found", adminRequest.getCategory()))));
+//        }
+//
+//        if (Objects.nonNull(adminRequest.getLocation())) {
+//            Location location = locationRepository.findByLatAndLon(adminRequest.getLocation().getLat(), adminRequest.getLocation().getLon())
+//                    .orElse(locationRepository.save(locationMapper.toEntity(adminRequest.getLocation())));
+//            event.setLocation(location);
+//        }
+//
+//        if (Objects.nonNull(adminRequest.getEventDate())) {
+//            event.setEventDate(LocalDateTime.parse(adminRequest.getEventDate(), DateTimeFormatter.ofPattern(TIME_PATTERN)));
+//        }
+//
+//        if (Objects.nonNull(adminRequest.getStateAction())) {
+//            event.setState(State.REJECTED);
+//        }
+//
+//        Event updatingEvent = ReflectionChange.go(event, adminRequest);
+//
+//        Event event1 = eventRepository.saveAndFlush(updatingEvent);
+//
+//        return eventMapper.toDto(eventRepository.saveAndFlush(updatingEvent), null, null, updatingEvent.getLocation());
         Event updatingEvent = updateEvent(event, adminRequest);
 
         return eventMapper.toDto(updatingEvent, 0, 0, updatingEvent.getLocation());
+//        return null;
     }
 
     @Override

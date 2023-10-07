@@ -37,13 +37,13 @@ public class RequestServiceImpl implements RequestService {
     @Transactional
     public ParticipationRequestDto create(Integer userId, Integer eventId) {
         log.info("Creating request with userId {} and eventId {}", userId, eventId);
-        List<Event> all = eventRepository.findAll();
 
-        User user = userRepository.findById(userId).get();
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException(String.format("User with id=%d was not found", userId)));
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException(String.format("Event with id=%d was not found", eventId)));
 
-        if (requestRepository.existsByRequesterIdAndEventId(userId, eventId)) {
+        if (event.getInitiator().getId().equals(user.getId())) {
             throw new ConflictException("could not execute statement; SQL [n/a]; constraint [uq_request]; " +
                     "nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement");
         }
@@ -53,13 +53,14 @@ public class RequestServiceImpl implements RequestService {
                     "nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement");
         }
 
-        if (event.getParticipantLimit() <= requestRepository.findConfirmedRequestsCount(eventId, State.CONFIRMED)) {
+        if (requestRepository.findConfirmedRequestsCount(eventId, State.CONFIRMED) >= event.getParticipantLimit() &&
+                event.getParticipantLimit() !=0) {
             throw new ConflictException("could not execute statement; SQL [n/a]; constraint [uq_request]; " +
                     "nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement");
         }
 
         ParticipationRequestDto participationRequestDto = participationRequestMapper.toDto(requestRepository.save(participationRequestMapper
-                .toEntity(user, event, LocalDateTime.now(), event.getRequestModeration() == true ||
+                .toEntity(user, event, LocalDateTime.now(), event.getRequestModeration() == true &&
                         event.getParticipantLimit() > 0 ? State.PENDING : State.CONFIRMED)));
         return participationRequestDto;
     }

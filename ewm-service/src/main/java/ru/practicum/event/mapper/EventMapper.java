@@ -19,6 +19,7 @@ import ru.practicum.user.mapper.UserMapper;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static ru.practicum.util.Constants.TIME_PATTERN;
@@ -48,7 +49,8 @@ public class EventMapper {
                 .id(event.getId())
                 .annotation(event.getAnnotation())
                 .category(modelMapper.doMapping(event.getCategory(), CategoryDto.builder().build()))
-                .location(modelMapper.doMapping(location, LocationDto.builder().build()))
+                .location(Objects.nonNull(location) ? modelMapper.doMapping(location, LocationDto.builder().build()) :
+                        modelMapper.doMapping(event.getLocation(), LocationDto.builder().build()) )
                 .createdOn(event.getCreatedOn().toString())
                 .description(event.getDescription())
                 .paid(event.getPaid())
