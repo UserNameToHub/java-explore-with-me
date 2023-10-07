@@ -1,6 +1,7 @@
 package ru.practicum.request.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import ru.practicum.common.enumiration.State;
@@ -12,6 +13,7 @@ import static ru.practicum.util.Constants.TIME_PATTERN;
 
 @Data
 @Builder
+@AllArgsConstructor
 public class ParticipationRequestDto {
     @NotNull
     @JsonFormat(pattern = TIME_PATTERN)

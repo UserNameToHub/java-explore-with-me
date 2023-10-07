@@ -45,9 +45,9 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     @Query("select e from Event as e " +
             "join e.initiator as i " +
             "join e.category as c " +
-            "where (:userId is null or i.id in :usersId) and (:stats is null or e.state in :stats) and " +
-            "(:categories is null or c.id in :categories) and (:rangeStart is null or e.eventDate >= :rangeStart) and " +
-            "(:rangeEnd is null or e.eventDate <= :rangeEnd)")
+            "where (:usersId is null or i.id in :usersId) and (:stats is null or e.state in :stats) and " +
+            "(:categories is null or c.id in :categories) and (cast(:rangeStart as date) is null or e.eventDate >= :rangeStart) and " +
+            "(cast(:rangeEnd as date) is null or e.eventDate <= :rangeEnd)")
     Page<Event> findAll(@Param("usersId") List<Integer> usersId,
                         @Param("stats") List<State> stats,
                         @Param("categories") List<Integer> categories,

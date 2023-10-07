@@ -9,13 +9,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.FIELD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = CreationDateConstraintValidator.class)
-public @interface CreationDateConstraint {
-    String hour();
-
-    String message() default "Должно содержать дату, которая еще не наступила.";
+public @interface CompareDateConstraint {
+    String message() default "Дата начала больше даты окончания периода.";
 
     Class<?>[] groups() default {};
 

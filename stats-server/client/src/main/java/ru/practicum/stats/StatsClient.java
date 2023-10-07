@@ -9,6 +9,7 @@ import ru.practicum.commonDto.HitGettingDto;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class StatsClient extends BaseClient {
     public StatsClient(RestTemplate restTemplate) {
@@ -27,7 +28,7 @@ public class StatsClient extends BaseClient {
 
         String url = "/stats?start={start}&end={end}&unique{unique}";
 
-        if (uris != null) {
+        if (Objects.nonNull(uris)) {
             parameters.put("uris", uris);
             url = "/stats?start={start}&end={end}&uris={uris}&unique{unique}";
 

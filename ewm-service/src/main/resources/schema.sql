@@ -5,14 +5,14 @@
 create table if not exists users
 (
     id    INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    email VARCHAR NOT NULL UNIQUE,
-    name  VARCHAR NOT NULL
+    email VARCHAR NOT NULL,
+    name  VARCHAR NOT NULL UNIQUE
 );
 
 create table if not exists categories
 (
     id   INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name VARCHAR(50) NOT NULL
+    name VARCHAR(50) UNIQUE NOT NULL
 );
 
 create table if not exists locations

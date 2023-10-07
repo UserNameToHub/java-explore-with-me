@@ -22,11 +22,11 @@ public class AdminEventController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<EventFullDto> getAll(@RequestParam("users") List<Integer> users,
-                                     @RequestParam("stats")List<State> states,
-                                     @RequestParam("categories") List<Integer> categories,
-                                     @RequestParam("rangeStart") @DateTimeFormat(pattern = TIME_PATTERN) LocalDateTime rangeStart,
-                                     @RequestParam("rangeEnd") @DateTimeFormat(pattern = TIME_PATTERN) LocalDateTime rangeEnd,
+    public List<EventFullDto> getAll(@RequestParam(value = "users", required = false) List<Integer> users,
+                                     @RequestParam(value = "stats", required = false)List<State> states,
+                                     @RequestParam(value = "categories", required = false) List<Integer> categories,
+                                     @RequestParam(value = "rangeStart", required = false) @DateTimeFormat(pattern = TIME_PATTERN) LocalDateTime rangeStart,
+                                     @RequestParam(value = "rangeEnd", required = false) @DateTimeFormat(pattern = TIME_PATTERN) LocalDateTime rangeEnd,
                                      @RequestParam(value = "from", defaultValue = "0") Integer from,
                                      @RequestParam(value = "size", defaultValue = "10") Integer size) {
         return eventService.findAll(users, states, categories, rangeStart, rangeEnd, from, size);

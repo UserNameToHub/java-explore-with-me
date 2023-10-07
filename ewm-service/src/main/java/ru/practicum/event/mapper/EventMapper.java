@@ -14,6 +14,7 @@ import ru.practicum.event.entity.Location;
 import ru.practicum.mapper.ModelMapper;
 import ru.practicum.user.dto.UserShortDto;
 import ru.practicum.user.entity.User;
+import ru.practicum.user.mapper.UserMapper;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,6 +27,7 @@ import static ru.practicum.util.Constants.TIME_PATTERN;
 @RequiredArgsConstructor
 public class EventMapper {
     private final ModelMapper modelMapper;
+    private final UserMapper userMapper;
 
     public EventShortDto toShortDto(Event event) {
         return EventShortDto.builder()
@@ -35,8 +37,10 @@ public class EventMapper {
                 .paid(event.getPaid())
                 .eventDate(event.getEventDate().format(DateTimeFormatter.ofPattern(TIME_PATTERN)))
                 .title(event.getTitle())
-                .initiator(modelMapper.doMapping(event.getInitiator(), UserShortDto.builder().build()))
+                .initiator(userMapper.toShortDto(event.getInitiator()))
                 .build();
+
+
     }
 
     public EventFullDto toDto(Event event, Integer views, Integer requests, Location location) {
@@ -103,6 +107,6 @@ public class EventMapper {
     }
 
     public List<EventShortDto> toShortDtoList(List<Event> events) {
-        return events.stream().map(e -> this.toShortDto(e)).collect(Collectors.toList());
+        return events.stream().map(this::toShortDto).collect(Collectors.toList());
     }
 }

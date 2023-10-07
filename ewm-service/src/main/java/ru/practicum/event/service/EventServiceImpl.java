@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.entity.Category;
@@ -22,10 +21,15 @@ import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.entity.Event;
 import ru.practicum.event.entity.Location;
 import ru.practicum.event.mapper.EventMapper;
+import ru.practicum.event.model.EventRequestStatusUpdateRequest;
+import ru.practicum.event.model.EventRequestStatusUpdateResult;
 import ru.practicum.event.model.UpdateEventAdminRequest;
+import ru.practicum.event.model.UpdateEventUserRequest;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.event.repository.LocationRepository;
 import ru.practicum.mapper.ModelMapper;
+import ru.practicum.request.dto.ParticipationRequestDto;
+import ru.practicum.request.entity.Request;
 import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.user.entity.User;
 import ru.practicum.user.repository.UserRepository;
@@ -38,8 +42,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.practicum.util.Constants.ORDER_BY_ID_ASC;
-import static ru.practicum.util.Constants.TIME_PATTERN;
+import static ru.practicum.util.Constants.*;
 
 @Slf4j
 @Service
@@ -66,7 +69,13 @@ public class EventServiceImpl implements EventService {
         List<EventShortDto> eventShortDtos = eventMapper.toShortDtoList(events);
         List<String> uris = getUris(eventShortDtos);
 
-        Map<Integer, Long> views = getViews(eventShortDtos, rangeStart, rangeEnd, servletRequest);
+        Map<Integer, Long> views = getViews(eventShortDtos, START_DATE, END_DATE);
+
+        eventShortDtos.stream().forEach(e -> {
+            Long view = views.get(e.getId());
+            e.setViews((views.isEmpty() || Objects.isNull(view)) ? 0 : view.intValue());
+            e.setConfirmedRequests(requestRepository.findConfirmedRequestsCount(e.getId(), State.CONFIRMED));
+        });
 
         uris.stream().forEach(e -> {
             try {
@@ -76,25 +85,34 @@ public class EventServiceImpl implements EventService {
             }
         });
 
-        eventShortDtos.stream().forEach(e -> {
-            e.setViews(views.isEmpty() ? 0: views.get(e.getId()).intValue());
-            e.setConfirmedRequests(requestRepository.findConfirmedRequestsCount(e.getId(), State.CONFIRMED));
-        });
-
         return eventShortDtos;
     }
 
     @Override
     public List<EventFullDto> findAll(List<Integer> usersId, List<State> stats, List<Integer> categories,
                                       LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
-        return modelMapper.doListMapping(eventRepository.findAll(usersId, stats, categories, rangeStart, rangeEnd,
-                PageRequest.of(from, size, ORDER_BY_ID_ASC)).toList(), EventFullDto.class);
+
+        List<Event> events = eventRepository.findAll(usersId, stats, categories, rangeStart, rangeEnd,
+                PageRequest.of(from, size, ORDER_BY_ID_ASC)).toList();
+
+
+        Integer confirmedRequestsCount = requestRepository.findConfirmedRequestsCount(events.get(0).getId(), State.CONFIRMED);
+        Map<Integer, Long> views = getViews(List.of(eventMapper.toShortDto(events.get(0))), START_DATE, END_DATE);
+
+        List<EventFullDto> eventFullDtos = eventMapper.toFullDtoList(eventRepository.findAll(usersId, stats, categories, rangeStart, rangeEnd,
+                PageRequest.of(from, size, ORDER_BY_ID_ASC)).toList(), null, confirmedRequestsCount);
+        return eventFullDtos;
     }
 
     @Override
     public List<EventFullDto> findAllByInitiatorId(Integer userId, Integer from, Integer size) {
         return eventMapper.toFullDtoList(eventRepository.findAllByInitiatorId(userId,
                 PageRequest.of(from, size, ORDER_BY_ID_ASC)).toList(), 0, 0);
+    }
+
+    @Override
+    public List<ParticipationRequestDto> findAllRequests(Integer userid, Integer eventId) {
+        return requestRepository.findAllByRequesterIdAndEventId(userid, eventId, PageRequest.of(0, 10, ORDER_BY_ID_ASC)).toList();
     }
 
     @Override
@@ -107,14 +125,25 @@ public class EventServiceImpl implements EventService {
             throw new RuntimeException(e);
         }
 
-        return eventMapper.toDto1(event, 0, 0);
+        Integer confirmedRequestsCount = requestRepository.findConfirmedRequestsCount(event.getId(), State.CONFIRMED);
+        Map<Integer, Long> views = getViews(List.of(eventMapper.toShortDto(event)), START_DATE, END_DATE);
+        return eventMapper.toDto1(event, views.isEmpty() ? 0 : views.get(event.getId()).intValue(), confirmedRequestsCount);
+    }
+
+    @Override
+    public EventFullDto findById(Integer userId, Integer eventId) {
+        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(() ->
+                new NotFoundException(String.format("Event with id=%d was not found", eventId)));
+
+        Map<Integer, Long> views = getViews(List.of(eventMapper.toShortDto(event)), START_DATE, END_DATE);
+        Integer confirmedRequestsCount = requestRepository.findConfirmedRequestsCount(eventId, State.CONFIRMED);
+        return eventMapper.toDto1(event, views.isEmpty() ? 0 : views.get(eventId).intValue(), confirmedRequestsCount);
     }
 
     @Override
     @Transactional
     public EventFullDto create(NewEventDto event, Integer userId) {
         log.info("Creating event with annotation {} and description {}", event.getAnnotation(), event.getDescription());
-
         Category category = categoryRepository.findById(event.getCategory()).orElseThrow(() ->
                 new NotFoundException(String.format("Category with id=%d was not found", event.getCategory())));
         User user = userRepository.findById(userId).orElseThrow(() ->
@@ -138,12 +167,42 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventFullDto update(NewEventDto newEventDto, Integer userId, Integer eventId) {
+    public EventRequestStatusUpdateResult updateRequestStatus(EventRequestStatusUpdateRequest eventRequest, Integer userId,
+                                                              Integer eventId) {
+        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(() ->
+            new NotFoundException(String.format("Event with id=%d was not found", eventId)));
+
+        checkParticipantLimit(event);
+
+        if (Objects.nonNull(eventRequest.getRequestIds())) {
+            List<Request> allByIdInAndEventId = requestRepository.findAllByIdInAndEventId(eventRequest.getRequestIds(), eventId);
+            List<Request> pendingRequests = allByIdInAndEventId.stream()
+                    .filter(e -> e.getStatus().equals(State.PENDING))
+                    .collect(Collectors.toList());
+
+            pendingRequests.stream().forEach(e -> {
+                e.setStatus(checkParticipantLimit(event) ? State.CONFIRMED : State.REJECTED);
+                requestRepository.saveAndFlush(e);
+            });
+        }
+
+        return EventRequestStatusUpdateResult.builder()
+                .rejectedRequests(requestRepository.findAllByEventIdAndStatus(eventId, State.REJECTED,
+                        PageRequest.of(0, 10, ORDER_BY_ID_ASC)).toList())
+                .confirmedRequests(requestRepository.findAllByEventIdAndStatus(eventId, State.CONFIRMED,
+                        PageRequest.of(0, 10, ORDER_BY_ID_ASC)).toList())
+                .build();
+    }
+
+    // admin
+    @Override
+    @Transactional
+    public EventFullDto update(UpdateEventUserRequest newEventDto, Integer userId, Integer eventId) {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(() ->
                 new NotFoundException(String.format("Event with id=%d was not found", eventId)));
 
         if (event.getState().equals(State.PUBLISHED)) {
-            throw new ConflictException("Event must not be published");
+            throw new ConflictException("Only pending or canceled events can be change");
         }
 
         Event updatingEvent = ReflectionChange.go(event, newEventDto);
@@ -165,15 +224,23 @@ public class EventServiceImpl implements EventService {
             updatingEvent.setLocation(location);
         }
 
+        if (Objects.nonNull(newEventDto.getStateAction())) {
+            if (newEventDto.getStateAction().equals(StateAction.CANCEL_REVIEW)) {
+                updatingEvent.setState(State.CANCELED);
+            }else {
+                updatingEvent.setState(State.PENDING);
+            }
+        }
+
         return eventMapper.toDto1(eventRepository.saveAndFlush(updatingEvent), 0, 0);
     }
 
-    private Map<Integer, Long> getViews(List<EventShortDto> eventDtos, @Nullable LocalDateTime start,
-                                        @Nullable LocalDateTime end, HttpServletRequest request) {
+    private Map<Integer, Long> getViews(List<EventShortDto> eventDtos, LocalDateTime start,
+                                        LocalDateTime end) {
         Map<Integer, Long> views = new HashMap<>();
 
         try {
-            List<HitGettingDto> hitList = statsClient.getAll(start, end, getUris(eventDtos), true, request);
+            List<HitGettingDto> hitList = statsClient.getAll(start, end, getUris(eventDtos), true);
             hitList.stream().forEach(e -> {
                 var id = e.getUri().split("/");
                 views.put(Integer.parseInt(id[id.length - 1]), e.getHits());
@@ -249,5 +316,15 @@ public class EventServiceImpl implements EventService {
                 });
 
         return event;
+    }
+
+    private boolean checkParticipantLimit(Event event) {
+        Integer countConfirmRequests = requestRepository.findConfirmedRequestsCount(event.getId(), State.CONFIRMED);
+
+        if (event.getParticipantLimit() < countConfirmRequests) {
+            throw new ConflictException("The participant limit has been reached");
+        }
+
+        return true;
     }
 }

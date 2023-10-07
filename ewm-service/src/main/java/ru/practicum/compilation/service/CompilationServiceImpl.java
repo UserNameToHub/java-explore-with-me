@@ -3,6 +3,7 @@ package ru.practicum.compilation.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.common.exception.NotFoundException;
@@ -18,6 +19,7 @@ import ru.practicum.event.repository.EventRepository;
 import ru.practicum.mapper.ModelMapper;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,8 +34,6 @@ public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
     private final CompilationMapper compilationMapper;
-    private final ModelMapper modelMapper;
-
 
     @Override
     @Transactional
@@ -64,8 +64,6 @@ public class CompilationServiceImpl implements CompilationService {
 
         ReflectionChange.go(compilation, updateCompilation);
         compilation.setEvents(events);
-//        compilation.setPinned(updateCompilation.getPinned());
-//        compilation.setTitle(updateCompilation.getTitle());
 
         return compilationMapper.toDto(compilationRepository.save(compilation));
     }
@@ -73,8 +71,8 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public List<CompilationDto> findAll(Boolean pinned, Integer from, Integer size) {
         log.info("Get all compilation");
-        return modelMapper.doListMapping(compilationRepository.findAll(pinned,
-                PageRequest.of(from, size, ORDER_BY_ID_ASC)).toList(), CompilationDto.class);
+        return compilationMapper.toListDto(compilationRepository.findAll(pinned,
+                PageRequest.of(from, size, ORDER_BY_ID_ASC)).toList());
     }
 
     @Override
@@ -83,6 +81,6 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationRepository.findById(id).orElseThrow(() ->
                 new NotFoundException(String.format("Compilation with id=% was not found", id)));
 
-        return modelMapper.doMapping(compilation, CompilationDto.builder().build());
+        return compilationMapper.toDto(compilation);
     }
 }

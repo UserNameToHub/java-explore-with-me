@@ -5,24 +5,20 @@ import org.springframework.stereotype.Component;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
 import ru.practicum.compilation.entity.Compilation;
-import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.entity.Event;
+import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.repository.EventRepository;
-import ru.practicum.mapper.ModelMapper;
 
-import javax.persistence.Entity;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class CompilationMapper {
-    private final ModelMapper modelMapper;
     private final EventRepository eventRepository;
+    private final EventMapper eventMapper;
 
-    public Compilation toEntity(NewCompilationDto newCompilationDto)  {
+    public Compilation toEntity(NewCompilationDto newCompilationDto) {
         var events = newCompilationDto.getEvents().stream()
                 .map(eventRepository::findById)
                 .map(Optional::orElseThrow)
@@ -41,7 +37,11 @@ public class CompilationMapper {
                 .id(compilation.getId())
                 .pinned(compilation.getPinned())
                 .title(compilation.getTitle())
-                .events(modelMapper.doListMapping(compilation.getEvents(), EventShortDto.class))
+                .events(eventMapper.toShortDtoList(compilation.getEvents()))
                 .build();
+    }
+
+    public List<CompilationDto> toListDto(List<Compilation> compilations) {
+        return compilations.stream().map(this::toDto).collect(Collectors.toList());
     }
 }

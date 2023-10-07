@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class ParticipationRequestMapper {
-
     public Request toEntity(User user, Event event, LocalDateTime timestamp, State status) {
         return Request.builder()
                 .created(timestamp)

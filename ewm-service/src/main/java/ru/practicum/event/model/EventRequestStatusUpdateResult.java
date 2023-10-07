@@ -1,5 +1,6 @@
 package ru.practicum.event.model;
 
+import lombok.Builder;
 import lombok.Data;
 import ru.practicum.request.dto.ParticipationRequestDto;
 
@@ -7,7 +8,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @Data
-@Valid
+@Builder
 public class EventRequestStatusUpdateResult {
     private List<ParticipationRequestDto> confirmedRequests;
     private List<ParticipationRequestDto> rejectedRequests;

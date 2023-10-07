@@ -1,5 +1,6 @@
 package ru.practicum.compilation.service;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
@@ -8,7 +9,7 @@ import ru.practicum.compilation.dto.UpdateCompilationRequest;
 import java.util.List;
 
 public interface CompilationService {
-    CompilationDto create(NewCompilationDto newCompilation);
+    CompilationDto create(@Nullable NewCompilationDto newCompilation);
 
     void delete(Integer id);
 

@@ -1,6 +1,7 @@
 package ru.practicum.request;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.service.RequestService;
@@ -19,6 +20,7 @@ public class PrivateRequestController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     private ParticipationRequestDto create(@PathVariable("userId") Integer userId,
                                            @RequestParam("eventId") Integer eventId) {
         return requestService.create(userId, eventId);

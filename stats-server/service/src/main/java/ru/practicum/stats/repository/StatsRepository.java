@@ -19,7 +19,7 @@ public interface StatsRepository extends JpaRepository<EndpointHit, Long> {
             "group by eh.app, eh.uri " +
             "order by 3 desc")
     List<HitGettingDto> findAllStats(@Param("start") LocalDateTime start,
-                                     @Param("end") LocalDateTime end,
+                                     @Param("endDate") LocalDateTime end,
                                      @Param("uris") Collection<String> uris,
                                      @Param("unique") Boolean unique);
 }

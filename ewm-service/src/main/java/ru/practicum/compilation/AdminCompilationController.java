@@ -1,6 +1,8 @@
 package ru.practicum.compilation;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
@@ -16,11 +18,13 @@ public class AdminCompilationController {
     private final CompilationService compilationService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public CompilationDto create(@RequestBody NewCompilationDto compilationDto) {
         return compilationService.create(compilationDto);
     }
 
-    @PostMapping("/{compId}")
+    @DeleteMapping("/{compId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("compId") Integer compId) {
         compilationService.delete(compId);
     }

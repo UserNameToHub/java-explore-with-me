@@ -17,7 +17,10 @@ import ru.practicum.user.entity.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import static ru.practicum.util.Constants.TIME_PATTERN;
 
 @Slf4j
 @Service
@@ -34,6 +37,7 @@ public class RequestServiceImpl implements RequestService {
     @Transactional
     public ParticipationRequestDto create(Integer userId, Integer eventId) {
         log.info("Creating request with userId {} and eventId {}", userId, eventId);
+        List<Event> all = eventRepository.findAll();
 
         User user = userRepository.findById(userId).get();
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
@@ -54,8 +58,10 @@ public class RequestServiceImpl implements RequestService {
                     "nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement");
         }
 
-        return participationRequestMapper.toDto(requestRepository.save(participationRequestMapper
-                .toEntity(user, event, LocalDateTime.now(), event.getRequestModeration() == true ? State.PENDING : State.CONFIRMED)));
+        ParticipationRequestDto participationRequestDto = participationRequestMapper.toDto(requestRepository.save(participationRequestMapper
+                .toEntity(user, event, LocalDateTime.now(), event.getRequestModeration() == true ||
+                        event.getParticipantLimit() > 0 ? State.PENDING : State.CONFIRMED)));
+        return participationRequestDto;
     }
 
     @Override
@@ -65,6 +71,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
     public ParticipationRequestDto edit(Integer userId, Integer requestId) {
         log.info("Editing request with userId {} and requestId.", userId, requestId);
 

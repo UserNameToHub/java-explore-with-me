@@ -9,6 +9,6 @@ import java.util.List;
 @Data
 @Builder
 public class EventRequestStatusUpdateRequest {
-    private List<Integer> ids;
+    private List<Integer> requestIds;
     private State status;
 }

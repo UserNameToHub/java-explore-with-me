@@ -1,8 +1,10 @@
 package ru.practicum.event;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.http.*;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.client.BaseClient;
@@ -14,6 +16,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static ru.practicum.util.Constants.TIME_PATTERN;
 
@@ -38,34 +42,25 @@ public class StatsClient extends BaseClient {
         post("/hit", hitJsonObject.toString(), Void.class);
     }
 
-    public List<HitGettingDto> getAll(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique,
-                                      HttpServletRequest request) throws JSONException {
+    public List<HitGettingDto> getAll(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) throws JSONException {
         Map<String, Object> parameters = new HashMap<>();
+        ObjectMapper mapper = new ObjectMapper();
+
         parameters.put("start", start.format(DateTimeFormatter.ofPattern(TIME_PATTERN)));
         parameters.put("end", end.format(DateTimeFormatter.ofPattern(TIME_PATTERN)));
         parameters.put("unique", unique);
 
         String url = "/stats?start={start}&end={end}&unique{unique}";
 
-        if (uris != null) {
+        if (Objects.nonNull(uris)) {
             parameters.put("uris", uris);
             url = "/stats?start={start}&end={end}&uris={uris}&unique{unique}";
         }
 
-        List<HitGettingDto> hitGettingDtos = get(url, parameters, HitGettingDto.class).getBody();
-
-        if (hitGettingDtos.isEmpty()) {
-            return hitGettingDtos;
-        }
-
-        hitGettingDtos.stream().forEach(e ->
-        {
-            try {
-                create("ewm-service", e.getUri(), request.getRemoteAddr(), LocalDateTime.now());
-            } catch (JSONException ex) {
-                throw new RuntimeException(ex.getMessage());
-            }
-        });
+        List<Object> objects = get(url, parameters, Object.class).getBody();
+        List<HitGettingDto> hitGettingDtos = objects.stream()
+                .map(e -> mapper.convertValue(e, HitGettingDto.class))
+                .collect(Collectors.toList());
 
         return hitGettingDtos;
     }

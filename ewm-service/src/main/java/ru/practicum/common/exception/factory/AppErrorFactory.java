@@ -4,10 +4,10 @@ import org.springframework.http.HttpStatus;
 import ru.practicum.common.exception.model.ApplicationError;
 
 public abstract class AppErrorFactory {
-    public <T extends Exception> ApplicationError create(T rex, HttpStatus responseCode) {
-        ApplicationError appError = createAppError(rex, responseCode);
+    public <T extends Exception> ApplicationError create(T rex, HttpStatus responseCode, String reason) {
+        ApplicationError appError = createAppError(rex, responseCode, reason);
         return appError;
     }
 
-    protected abstract <T extends Exception>  ApplicationError createAppError(T rex, HttpStatus responseCode);
+    protected abstract <T extends Exception>  ApplicationError createAppError(T rex, HttpStatus responseCode, String reason);
 }

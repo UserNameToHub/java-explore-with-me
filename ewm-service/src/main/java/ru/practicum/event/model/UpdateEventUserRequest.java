@@ -1,39 +1,31 @@
-package ru.practicum.event.dto;
+package ru.practicum.event.model;
 
+
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
-import ru.practicum.common.validation.validationGroup.Create;
-
-import javax.validation.constraints.*;
+import ru.practicum.common.enumiration.StateAction;
+import ru.practicum.event.dto.LocationDto;
 
 @Data
 @Builder
-public class NewEventDto {
-    @NotBlank
+@AllArgsConstructor
+@NoArgsConstructor
+public class UpdateEventUserRequest {
     @Length(min = 20, max = 2000)
     private String annotation;
-
-    @NotNull
     private Integer category;
-
-    @NotBlank
     @Length(min = 20, max = 7000)
     private String description;
-
-    @NotBlank
     private String eventDate;
-
-    @NotNull
     private LocationDto location;
-
-    private Integer participantLimit;
-
     private Boolean paid;
-
+    private Integer participantLimit;
     private Boolean requestModeration;
-
-    @NotBlank
+    private StateAction stateAction;
     @Length(min = 3, max = 120)
     private String title;
+
 }

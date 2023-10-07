@@ -9,8 +9,9 @@ import ru.practicum.user.entity.User;
 import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
-
     @Query("select u from User as u " +
             "where (:ids is null or u.id in :ids)")
     Page<User> findAll(List<Integer> ids, Pageable pageable);
+
+    boolean existsByNameContainsIgnoreCase(String name);
 }

@@ -9,7 +9,12 @@ import ru.practicum.common.validation.validationGroup.Create;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
+import ru.practicum.event.model.EventRequestStatusUpdateRequest;
+import ru.practicum.event.model.EventRequestStatusUpdateResult;
 import ru.practicum.event.model.UpdateEventAdminRequest;
+import ru.practicum.event.model.UpdateEventUserRequest;
+import ru.practicum.request.dto.ParticipationRequestDto;
+import ru.practicum.user.entity.User;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -24,7 +29,11 @@ public interface EventService {
     List<EventFullDto> findAll(List<Integer> usersId, List<State> stats, List<Integer> categories, LocalDateTime rangeStart,
                                 LocalDateTime rangeEnd, Integer from, Integer size);
 
+    List<ParticipationRequestDto> findAllRequests(Integer userid, Integer eventId);
+
     EventFullDto findById(Integer id, State state, HttpServletRequest servletRequest);
+
+    EventFullDto findById(Integer userId, Integer eventId);
 
     List<EventFullDto> findAllByInitiatorId(Integer userId, Integer from, Integer size);
 
@@ -32,6 +41,8 @@ public interface EventService {
 
     EventFullDto update(UpdateEventAdminRequest adminRequest, Integer eventId);
 
-    EventFullDto update(NewEventDto newEventDto, Integer userId, Integer eventId);
+    EventFullDto update(UpdateEventUserRequest newEventDto, Integer userId, Integer eventId);
+
+    EventRequestStatusUpdateResult updateRequestStatus(EventRequestStatusUpdateRequest eventRequest, Integer userId, Integer eventId);
 
 }
