@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Data;
 import ru.practicum.request.dto.ParticipationRequestDto;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @Data

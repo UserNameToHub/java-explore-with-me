@@ -3,13 +3,10 @@ package ru.practicum.event.entity;
 import lombok.*;
 import ru.practicum.category.entity.Category;
 import ru.practicum.common.enumiration.State;
-import ru.practicum.compilation.entity.Compilation;
 import ru.practicum.user.entity.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "events")

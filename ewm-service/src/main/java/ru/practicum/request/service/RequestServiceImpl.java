@@ -17,10 +17,8 @@ import ru.practicum.user.entity.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static ru.practicum.util.Constants.TIME_PATTERN;
 
 @Slf4j
 @Service
@@ -43,20 +41,21 @@ public class RequestServiceImpl implements RequestService {
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException(String.format("Event with id=%d was not found", eventId)));
 
+        if (requestRepository.existRepeatingRequest(eventId, userId)) {
+            throw new ConflictException("Такой запрос уже существует.");
+        }
+
         if (event.getInitiator().getId().equals(user.getId())) {
-            throw new ConflictException("could not execute statement; SQL [n/a]; constraint [uq_request]; " +
-                    "nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement");
+            throw new ConflictException("Инициатор события не может создать запрос.");
         }
 
         if (!eventRepository.existsByIdAndStateIs(eventId, State.PUBLISHED)) {
-            throw new ConflictException("could not execute statement; SQL [n/a]; constraint [uq_request]; " +
-                    "nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement");
+            throw new ConflictException("Создать запрос можно только на опубликованное событие.");
         }
 
         if (requestRepository.findConfirmedRequestsCount(eventId, State.CONFIRMED) >= event.getParticipantLimit() &&
-                event.getParticipantLimit() !=0) {
-            throw new ConflictException("could not execute statement; SQL [n/a]; constraint [uq_request]; " +
-                    "nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement");
+                event.getParticipantLimit() != 0) {
+            throw new ConflictException("Лимит запросов уже достигнут.");
         }
 
         ParticipationRequestDto participationRequestDto = participationRequestMapper.toDto(requestRepository.save(participationRequestMapper
@@ -75,7 +74,6 @@ public class RequestServiceImpl implements RequestService {
     @Transactional
     public ParticipationRequestDto edit(Integer userId, Integer requestId) {
         log.info("Editing request with userId {} and requestId.", userId, requestId);
-
         Request request = requestRepository.findById(requestId).orElseThrow(() ->
                 new NotFoundException(String.format("Request with id=%d was not found", requestId)));
 

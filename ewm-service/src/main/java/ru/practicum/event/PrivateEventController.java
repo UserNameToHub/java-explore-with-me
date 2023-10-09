@@ -2,25 +2,15 @@ package ru.practicum.event;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.common.validation.validationGroup.Create;
 import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.model.UpdateEventAdminRequest;
 import ru.practicum.event.model.UpdateEventUserRequest;
 import ru.practicum.event.service.EventService;
 import ru.practicum.event.model.EventRequestStatusUpdateRequest;
 import ru.practicum.event.model.EventRequestStatusUpdateResult;
 import ru.practicum.request.dto.ParticipationRequestDto;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestEvent;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -46,28 +36,28 @@ public class PrivateEventController {
 
     @GetMapping("/{eventId}")
     public EventFullDto getByEventId(@PathVariable("userId") Integer userId,
-                                      @PathVariable("eventId") Integer eventId) {
+                                     @PathVariable("eventId") Integer eventId) {
         return eventService.findById(userId, eventId);
     }
 
     @PatchMapping("/{eventId}")
     public EventFullDto editByEventId(@RequestBody @Valid UpdateEventUserRequest eventUserRequest,
-                                       @PathVariable("userId") Integer userId,
-                                       @PathVariable("eventId") Integer eventId) {
+                                      @PathVariable("userId") Integer userId,
+                                      @PathVariable("eventId") Integer eventId) {
         return eventService.update(eventUserRequest, userId, eventId);
     }
 
 
     @GetMapping("/{eventId}/requests")
     public List<ParticipationRequestDto> getAllRequestsByUser(@PathVariable("userId") Integer userId,
-                                                               @PathVariable("eventId") Integer eventId) {
+                                                              @PathVariable("eventId") Integer eventId) {
         return eventService.findAllRequests(userId, eventId);
     }
 
     @PatchMapping("/{eventId}/requests")
     public EventRequestStatusUpdateResult editRequestStatus(@RequestBody @Valid EventRequestStatusUpdateRequest eventRequestStatus,
-                                                             @PathVariable("userId") Integer userId,
-                                                             @PathVariable("eventId") Integer eventId) {
+                                                            @PathVariable("userId") Integer userId,
+                                                            @PathVariable("eventId") Integer eventId) {
         return eventService.updateRequestStatus(eventRequestStatus, userId, eventId);
     }
 }

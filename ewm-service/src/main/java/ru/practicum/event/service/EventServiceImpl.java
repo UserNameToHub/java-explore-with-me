@@ -58,7 +58,6 @@ public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper;
     private final LocationMapper locationMapper;
 
-
     @Override
     public List<EventShortDto> findAll(String text, List<Integer> categories, Boolean paid, LocalDateTime rangeStart,
                                        LocalDateTime rangeEnd, Boolean requestParam, String sort, Integer from, Integer size,
@@ -82,11 +81,7 @@ public class EventServiceImpl implements EventService {
         });
 
         uris.stream().forEach(e -> {
-            try {
-                statsClient.create("ewm-service", e, servletRequest.getRemoteAddr(), LocalDateTime.now());
-            } catch (JSONException ex) {
-                throw new RuntimeException(ex);
-            }
+            statsClient.create("ewm-service", e, servletRequest.getRemoteAddr(), LocalDateTime.now());
         });
 
         return eventShortDtos;
@@ -123,15 +118,12 @@ public class EventServiceImpl implements EventService {
     public EventFullDto findById(Integer id, State state, HttpServletRequest servletRequest) {
         Event event = eventRepository.findByIdAndStateIs(id, state).orElseThrow(() ->
                 new NotFoundException(String.format("Event with id=%d was not found", id)));
-        try {
-            statsClient.create("ewm-service", "/events/" + id , servletRequest.getRemoteAddr(), LocalDateTime.now());
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+
+        statsClient.create("ewm-service", "/events/" + id, servletRequest.getRemoteAddr(), LocalDateTime.now());
 
         Integer confirmedRequestsCount = requestRepository.findConfirmedRequestsCount(event.getId(), State.CONFIRMED);
         Map<Integer, Long> views = getViews(List.of(eventMapper.toShortDto(event)), START_DATE, END_DATE);
-        return eventMapper.toDto1(event, views.isEmpty() ? 0 : views.get(event.getId()).intValue(), confirmedRequestsCount);
+        return eventMapper.toDtoWithoutLocation(event, views.isEmpty() ? 0 : views.get(event.getId()).intValue(), confirmedRequestsCount);
     }
 
     @Override
@@ -141,7 +133,7 @@ public class EventServiceImpl implements EventService {
 
         Map<Integer, Long> views = getViews(List.of(eventMapper.toShortDto(event)), START_DATE, END_DATE);
         Integer confirmedRequestsCount = requestRepository.findConfirmedRequestsCount(eventId, State.CONFIRMED);
-        return eventMapper.toDto1(event, views.isEmpty() ? 0 : views.get(eventId).intValue(), confirmedRequestsCount);
+        return eventMapper.toDtoWithoutLocation(event, views.isEmpty() ? 0 : views.get(eventId).intValue(), confirmedRequestsCount);
     }
 
     @Override
@@ -153,7 +145,7 @@ public class EventServiceImpl implements EventService {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format("User with id=%d was not found", userId)));
         Location location = locationRepository.findByLatAndLon(event.getLocation().getLat(), event.getLocation().getLon())
-                    .orElse(locationRepository.save(locationMapper.toEntity(event.getLocation())));
+                .orElse(locationRepository.save(locationMapper.toEntity(event.getLocation())));
 
         return eventMapper.toDto(eventRepository.save(eventMapper.toEntity(event, user, category, location)), 0, 0, location);
     }
@@ -163,39 +155,9 @@ public class EventServiceImpl implements EventService {
     public EventFullDto update(UpdateEventAdminRequest adminRequest, Integer eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException(String.format("Event with id=%d was not found", eventId)));
-
-//        if (event.getState().equals(State.PUBLISHED)) {
-//            throw new ConflictException("Only pending or canceled events can be changed");
-//        }
-//
-//        if (Objects.nonNull(adminRequest.getCategory())) {
-//            event.setCategory(categoryRepository.findById(adminRequest.getCategory()).orElseThrow(() ->
-//                    new NotFoundException(String.format("Category with id=%d was not found", adminRequest.getCategory()))));
-//        }
-//
-//        if (Objects.nonNull(adminRequest.getLocation())) {
-//            Location location = locationRepository.findByLatAndLon(adminRequest.getLocation().getLat(), adminRequest.getLocation().getLon())
-//                    .orElse(locationRepository.save(locationMapper.toEntity(adminRequest.getLocation())));
-//            event.setLocation(location);
-//        }
-//
-//        if (Objects.nonNull(adminRequest.getEventDate())) {
-//            event.setEventDate(LocalDateTime.parse(adminRequest.getEventDate(), DateTimeFormatter.ofPattern(TIME_PATTERN)));
-//        }
-//
-//        if (Objects.nonNull(adminRequest.getStateAction())) {
-//            event.setState(State.REJECTED);
-//        }
-//
-//        Event updatingEvent = ReflectionChange.go(event, adminRequest);
-//
-//        Event event1 = eventRepository.saveAndFlush(updatingEvent);
-//
-//        return eventMapper.toDto(eventRepository.saveAndFlush(updatingEvent), null, null, updatingEvent.getLocation());
         Event updatingEvent = updateEvent(event, adminRequest);
 
         return eventMapper.toDto(updatingEvent, 0, 0, updatingEvent.getLocation());
-//        return null;
     }
 
     @Override
@@ -203,17 +165,17 @@ public class EventServiceImpl implements EventService {
     public EventRequestStatusUpdateResult updateRequestStatus(EventRequestStatusUpdateRequest eventRequest, Integer userId,
                                                               Integer eventId) {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(() ->
-            new NotFoundException(String.format("Event with id=%d was not found", eventId)));
+                new NotFoundException(String.format("Event with id=%d was not found", eventId)));
 
         checkParticipantLimit(event);
 
         if (Objects.nonNull(eventRequest.getRequestIds())) {
-            List<Request> allByIdInAndEventId = requestRepository.findAllByIdInAndEventId(eventRequest.getRequestIds(), eventId);
-            List<Request> pendingRequests = allByIdInAndEventId.stream()
-                    .filter(e -> e.getStatus().equals(State.PENDING))
-                    .collect(Collectors.toList());
+            List<Request> events = requestRepository.findAllByIdInAndEventId(eventRequest.getRequestIds(), eventId);
 
-            pendingRequests.stream().forEach(e -> {
+            events.stream().forEach(e -> {
+                if (!e.getStatus().equals(State.PENDING)) {
+                    throw new ConflictException("");
+                }
                 e.setStatus(checkParticipantLimit(event) ? State.CONFIRMED : State.REJECTED);
                 requestRepository.saveAndFlush(e);
             });
@@ -253,19 +215,19 @@ public class EventServiceImpl implements EventService {
         if (Objects.nonNull(newEventDto.getLocation())) {
             Location location = locationRepository.findByLatAndLon(newEventDto.getLocation().getLat(),
                     newEventDto.getLocation().getLon()).orElse(locationRepository.save(
-                            modelMapper.doMapping(newEventDto.getLocation(), Location.builder().build())));
+                    modelMapper.doMapping(newEventDto.getLocation(), Location.builder().build())));
             updatingEvent.setLocation(location);
         }
 
         if (Objects.nonNull(newEventDto.getStateAction())) {
             if (newEventDto.getStateAction().equals(StateAction.CANCEL_REVIEW)) {
                 updatingEvent.setState(State.CANCELED);
-            }else {
+            } else {
                 updatingEvent.setState(State.PENDING);
             }
         }
 
-        return eventMapper.toDto1(eventRepository.saveAndFlush(updatingEvent), 0, 0);
+        return eventMapper.toDtoWithoutLocation(eventRepository.saveAndFlush(updatingEvent), 0, 0);
     }
 
     private Map<Integer, Long> getViews(List<EventShortDto> eventDtos, LocalDateTime start,
@@ -297,7 +259,7 @@ public class EventServiceImpl implements EventService {
                 .filter(o -> {
                     o.setAccessible(true);
                     try {
-                       return Objects.nonNull(o.get(updateEvent));
+                        return Objects.nonNull(o.get(updateEvent));
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException(e);
                     }
@@ -354,7 +316,7 @@ public class EventServiceImpl implements EventService {
     private boolean checkParticipantLimit(Event event) {
         Integer countConfirmRequests = requestRepository.findConfirmedRequestsCount(event.getId(), State.CONFIRMED);
 
-        if (event.getParticipantLimit() < countConfirmRequests) {
+        if (countConfirmRequests == event.getParticipantLimit()) {
             throw new ConflictException("The participant limit has been reached");
         }
 

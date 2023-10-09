@@ -6,13 +6,20 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.common.enumiration.State;
-import ru.practicum.event.entity.Event;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.entity.Request;
 
 import java.util.List;
 
 public interface RequestRepository extends JpaRepository<Request, Integer> {
+    @Query("select case when count (r) > 0 then true else false end from Request as r " +
+            "join r.event as e " +
+            "join r.requester as u " +
+            "where r.id = :eventId and u.id = :userId")
+    boolean existRepeatingRequest(Integer eventId, Integer userId);
+
+    boolean existsByEventIsAndCreatedIs(Integer eventId, Integer userId);
+
     @Query("select r from Request as r " +
             "join r.event as e " +
             "where e.id = :eventId and r.id in :ids")

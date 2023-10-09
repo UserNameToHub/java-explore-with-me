@@ -50,7 +50,7 @@ public class EventMapper {
                 .annotation(event.getAnnotation())
                 .category(modelMapper.doMapping(event.getCategory(), CategoryDto.builder().build()))
                 .location(Objects.nonNull(location) ? modelMapper.doMapping(location, LocationDto.builder().build()) :
-                        modelMapper.doMapping(event.getLocation(), LocationDto.builder().build()) )
+                        modelMapper.doMapping(event.getLocation(), LocationDto.builder().build()))
                 .createdOn(event.getCreatedOn().toString())
                 .description(event.getDescription())
                 .paid(event.getPaid())
@@ -66,7 +66,7 @@ public class EventMapper {
                 .build();
     }
 
-    public EventFullDto toDto1(Event event, Integer views, Integer requests) {
+    public EventFullDto toDtoWithoutLocation(Event event, Integer views, Integer requests) {
         return EventFullDto.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
@@ -105,7 +105,7 @@ public class EventMapper {
 
 
     public List<EventFullDto> toFullDtoList(List<Event> events, Integer views, Integer requests) {
-       return events.stream().map(e -> this.toDto1(e, views, requests)).collect(Collectors.toList());
+        return events.stream().map(e -> this.toDtoWithoutLocation(e, views, requests)).collect(Collectors.toList());
     }
 
     public List<EventShortDto> toShortDtoList(List<Event> events) {

@@ -3,7 +3,6 @@ package ru.practicum.compilation.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.common.exception.NotFoundException;
@@ -16,7 +15,6 @@ import ru.practicum.compilation.mapper.CompilationMapper;
 import ru.practicum.compilation.repository.CompilationRepository;
 import ru.practicum.event.entity.Event;
 import ru.practicum.event.repository.EventRepository;
-import ru.practicum.mapper.ModelMapper;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,9 +54,9 @@ public class CompilationServiceImpl implements CompilationService {
 
         var events = Objects.nonNull(updateCompilation.getEvents()) ?
                 updateCompilation.getEvents().stream()
-                .map(eventRepository::findById)
-                .map(Optional::get)
-                .collect(Collectors.toList()) : new ArrayList<Event>();
+                        .map(eventRepository::findById)
+                        .map(Optional::get)
+                        .collect(Collectors.toList()) : new ArrayList<Event>();
 
         ReflectionChange.go(compilation, updateCompilation);
         compilation.setEvents(events);

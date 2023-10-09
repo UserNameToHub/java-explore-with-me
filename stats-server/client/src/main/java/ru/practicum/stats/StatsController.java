@@ -28,7 +28,7 @@ public class StatsController {
     public ResponseEntity<List<HitGettingDto>> getAll(@RequestParam String start,
                                                       @RequestParam String end,
                                                       @RequestParam(required = false) List<String> uris,
-                                                      @RequestParam(defaultValue = "false") boolean unique) {
+                                                      @RequestParam(defaultValue = "true") boolean unique) {
         return statsClient.getAll(start, end, uris, unique);
     }
 }

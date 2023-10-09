@@ -3,14 +3,10 @@ package ru.practicum.event;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
-import org.springframework.http.*;
-import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.client.BaseClient;
 import ru.practicum.event.dto.HitGettingDto;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -26,20 +22,18 @@ public class StatsClient extends BaseClient {
         super(rest);
     }
 
-    public void create(String app, String uri, String ip, LocalDateTime timestamp) throws JSONException {
+    public void create(String app, String uri, String ip, LocalDateTime timestamp) {
         JSONObject hitJsonObject = new JSONObject();
-        hitJsonObject.put("app", app);
-        hitJsonObject.put("uri", uri);
-        hitJsonObject.put("ip", ip);
-        hitJsonObject.put("timestamp", timestamp.format(DateTimeFormatter.ofPattern(TIME_PATTERN)));
+        try {
+            hitJsonObject.put("app", app);
+            hitJsonObject.put("uri", uri);
+            hitJsonObject.put("ip", ip);
+            hitJsonObject.put("timestamp", timestamp.format(DateTimeFormatter.ofPattern(TIME_PATTERN)));
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
 
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-//
-//        HttpEntity<String> request = new HttpEntity<>(hitJsonObject.toString(), headers);
-//        post("/hit", request, Void.class);
-        post("/hit", hitJsonObject.toString(), Void.class);
+        post("/hit", hitJsonObject.toString(), String.class);
     }
 
     public List<HitGettingDto> getAll(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) throws JSONException {
@@ -48,7 +42,7 @@ public class StatsClient extends BaseClient {
 
         parameters.put("start", start.format(DateTimeFormatter.ofPattern(TIME_PATTERN)));
         parameters.put("end", end.format(DateTimeFormatter.ofPattern(TIME_PATTERN)));
-        parameters.put("unique", unique);
+        parameters.put("unique", String.valueOf(unique));
 
         String url = "/stats?start={start}&end={end}&unique{unique}";
 

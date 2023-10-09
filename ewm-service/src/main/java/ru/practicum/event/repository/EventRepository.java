@@ -24,7 +24,6 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     Optional<Event> findByIdAndStateIs(Integer id, State state);
 
 
-
     @Query("select e from Event as e " +
             "join e.category as c " +
             "where e.state = 'PUBLISHED' and (:text is null or (upper(e.annotation) like concat('%', upper(:text), '%'))) or " +

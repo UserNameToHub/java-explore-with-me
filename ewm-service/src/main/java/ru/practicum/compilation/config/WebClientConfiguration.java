@@ -11,6 +11,7 @@ import ru.practicum.event.StatsClient;
 
 @Configuration
 public class WebClientConfiguration {
+//    @Value(value = "${ewm-server.url}")
     @Value(value = "${stats-server.url}")
     private String serverUrl;
 

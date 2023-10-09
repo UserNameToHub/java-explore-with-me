@@ -1,6 +1,3 @@
--- drop table if exists compilations;
--- drop table if exists events;
-
 create table if not exists users
 (
     id    INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -24,7 +21,7 @@ create table if not exists locations
 create table if not exists compilations
 (
     id     INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    pinned BOOLEAN,
+    pinned BOOLEAN DEFAULT FALSE,
     title  VARCHAR NOT NULL
 );
 
