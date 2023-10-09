@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.entity.Category;
 import ru.practicum.category.repository.CategoryRepository;
+import ru.practicum.common.enumiration.SortEvent;
 import ru.practicum.common.enumiration.State;
 import ru.practicum.common.enumiration.StateAction;
 import ru.practicum.common.exception.ConflictException;
@@ -60,7 +61,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> findAll(String text, List<Integer> categories, Boolean paid, LocalDateTime rangeStart,
-                                       LocalDateTime rangeEnd, Boolean requestParam, String sort, Integer from, Integer size,
+                                       LocalDateTime rangeEnd, Boolean requestParam, SortEvent sort, Integer from, Integer size,
                                        HttpServletRequest servletRequest) {
         List<Event> events = eventRepository.findAll(text, categories, paid,
                 rangeStart, rangeEnd, requestParam, PageRequest.of(from, size)).toList();
@@ -70,6 +71,7 @@ public class EventServiceImpl implements EventService {
         }
 
         List<EventShortDto> eventShortDtos = eventMapper.toShortDtoList(events);
+
         List<String> uris = getUris(eventShortDtos);
 
         Map<Integer, Long> views = getViews(eventShortDtos, START_DATE, END_DATE);
@@ -84,6 +86,14 @@ public class EventServiceImpl implements EventService {
             statsClient.create("ewm-service", e, servletRequest.getRemoteAddr(), LocalDateTime.now());
         });
 
+        if (Objects.nonNull(sort)) {
+            if (sort.equals("VIEWS")) {
+                eventShortDtos.sort((v1, v2) -> v1.getViews().compareTo(v2.getViews()));
+            } else {
+                eventShortDtos.sort((d1, d2) -> d1.getEventDate().compareTo(d2.getEventDate()));
+            }
+        }
+
         return eventShortDtos;
     }
 
@@ -94,19 +104,18 @@ public class EventServiceImpl implements EventService {
         List<Event> events = eventRepository.findAll(usersId, stats, categories, rangeStart, rangeEnd,
                 PageRequest.of(from, size, ORDER_BY_ID_ASC)).toList();
 
-
         Integer confirmedRequestsCount = requestRepository.findConfirmedRequestsCount(events.get(0).getId(), State.CONFIRMED);
-        Map<Integer, Long> views = getViews(List.of(eventMapper.toShortDto(events.get(0))), START_DATE, END_DATE);
+        Map<Integer, Long> views = getViews(eventMapper.toShortDtoList(events), START_DATE, END_DATE);
 
-        List<EventFullDto> eventFullDtos = eventMapper.toFullDtoList(eventRepository.findAll(usersId, stats, categories, rangeStart, rangeEnd,
-                PageRequest.of(from, size, ORDER_BY_ID_ASC)).toList(), null, confirmedRequestsCount);
-        return eventFullDtos;
+        return eventMapper.toFullDtoList(events, views, confirmedRequestsCount);
     }
 
     @Override
     public List<EventFullDto> findAllByInitiatorId(Integer userId, Integer from, Integer size) {
+        List<Event> events = eventRepository.findAllByInitiatorId(userId, PageRequest.of(from, size, ORDER_BY_ID_ASC)).toList();
+        Map<Integer, Long> views = getViews(eventMapper.toShortDtoList(events), START_DATE, END_DATE);
         return eventMapper.toFullDtoList(eventRepository.findAllByInitiatorId(userId,
-                PageRequest.of(from, size, ORDER_BY_ID_ASC)).toList(), 0, 0);
+                PageRequest.of(from, size, ORDER_BY_ID_ASC)).toList(), views, 0);
     }
 
     @Override
@@ -147,7 +156,8 @@ public class EventServiceImpl implements EventService {
         Location location = locationRepository.findByLatAndLon(event.getLocation().getLat(), event.getLocation().getLon())
                 .orElse(locationRepository.save(locationMapper.toEntity(event.getLocation())));
 
-        return eventMapper.toDto(eventRepository.save(eventMapper.toEntity(event, user, category, location)), 0, 0, location);
+        return eventMapper.toDto(eventRepository.save(eventMapper.toEntity(event, user, category, location)), 0,
+                0, location);
     }
 
     @Override
@@ -167,16 +177,15 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(() ->
                 new NotFoundException(String.format("Event with id=%d was not found", eventId)));
 
-        checkParticipantLimit(event);
-
         if (Objects.nonNull(eventRequest.getRequestIds())) {
             List<Request> events = requestRepository.findAllByIdInAndEventId(eventRequest.getRequestIds(), eventId);
 
             events.stream().forEach(e -> {
                 if (!e.getStatus().equals(State.PENDING)) {
-                    throw new ConflictException("");
+                    throw new ConflictException("Изменить статус можно только у ожидающего события.");
                 }
-                e.setStatus(checkParticipantLimit(event) ? State.CONFIRMED : State.REJECTED);
+                e.setStatus(checkParticipantLimit(event) ? eventRequest.getStatus() : State.REJECTED);
+                Request e1 = e;
                 requestRepository.saveAndFlush(e);
             });
         }
@@ -189,7 +198,6 @@ public class EventServiceImpl implements EventService {
                 .build();
     }
 
-    // admin
     @Override
     @Transactional
     public EventFullDto update(UpdateEventUserRequest newEventDto, Integer userId, Integer eventId) {

@@ -12,10 +12,10 @@ import ru.practicum.request.entity.Request;
 import java.util.List;
 
 public interface RequestRepository extends JpaRepository<Request, Integer> {
-    @Query("select case when count (r) > 0 then true else false end from Request as r " +
-            "join r.event as e " +
-            "join r.requester as u " +
-            "where r.id = :eventId and u.id = :userId")
+    @Query(value = "select case when count (r) > 0 then true else false end from requests as r " +
+            "inner join events as e on e.id = r.event_id " +
+            "inner join users as u on u.id = r.user_id " +
+            "where e.id = ?1 and u.id = ?2", nativeQuery = true)
     boolean existRepeatingRequest(Integer eventId, Integer userId);
 
     boolean existsByEventIsAndCreatedIs(Integer eventId, Integer userId);

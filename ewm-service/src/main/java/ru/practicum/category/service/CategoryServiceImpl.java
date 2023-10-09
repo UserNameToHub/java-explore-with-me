@@ -38,7 +38,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto findById(Integer id) {
         log.info("Get user with id {}.", id);
         Category category = categoryRepository.findById(id).orElseThrow(() ->
-                new RuntimeException(String.format("Category with id=%d was not found", id)));
+                new NotFoundException(String.format("Category with id=%d was not found", id)));
 
         return modelMapper.doMapping(category, CategoryDto.builder().build());
     }
@@ -47,7 +47,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public CategoryDto create(NewCategoryDto newCategoryDto) {
         log.info("Creating category with name {}", newCategoryDto.getName());
-        return modelMapper.doMapping(categoryRepository.saveAndFlush(modelMapper.doMapping(newCategoryDto, new Category())),
+        return modelMapper.doMapping(categoryRepository.save(modelMapper.doMapping(newCategoryDto, new Category())),
                 new CategoryDto());
     }
 

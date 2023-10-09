@@ -1,9 +1,11 @@
 package ru.practicum.event;
 
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.common.enumiration.SortEvent;
 import ru.practicum.common.enumiration.State;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
@@ -19,6 +21,7 @@ import static ru.practicum.util.Constants.TIME_PATTERN;
 @RequestMapping("/events")
 @AllArgsConstructor
 public class PublicEventController {
+    @Autowired
     private final EventService eventService;
 
     @GetMapping
@@ -29,7 +32,7 @@ public class PublicEventController {
                                       @RequestParam(value = "rangeStart", required = false) @DateTimeFormat(pattern = TIME_PATTERN) LocalDateTime rangeStart,
                                       @RequestParam(value = "rangeEnd", required = false) @DateTimeFormat(pattern = TIME_PATTERN) LocalDateTime rangeEnd,
                                       @RequestParam(value = "onlyAvailable", defaultValue = "false") Boolean RequestParam,
-                                      @RequestParam(value = "sort", required = false) String sort,
+                                      @RequestParam(value = "sort", required = false) SortEvent sort,
                                       @RequestParam(value = "from", defaultValue = "0") Integer from,
                                       @RequestParam(value = "size", defaultValue = "10") Integer size,
                                       HttpServletRequest request) {

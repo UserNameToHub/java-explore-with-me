@@ -30,7 +30,7 @@ public class CompilationMapper {
 
 
         return Compilation.builder()
-                .pinned(newCompilationDto.getPinned())
+                .pinned(Objects.nonNull(newCompilationDto.getPinned()) ? newCompilationDto.getPinned() : false)
                 .title(newCompilationDto.getTitle())
                 .events(events)
                 .build();

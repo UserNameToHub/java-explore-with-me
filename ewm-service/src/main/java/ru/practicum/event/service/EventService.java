@@ -1,5 +1,7 @@
 package ru.practicum.event.service;
 
+import org.springframework.stereotype.Service;
+import ru.practicum.common.enumiration.SortEvent;
 import ru.practicum.common.enumiration.State;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
@@ -16,7 +18,7 @@ import java.util.List;
 
 public interface EventService {
     List<EventShortDto> findAll(String text, List<Integer> categories, Boolean paid, LocalDateTime rangeStart,
-                                LocalDateTime rangeEnd, Boolean requestParam, String sort, Integer from, Integer size,
+                                LocalDateTime rangeEnd, Boolean requestParam, SortEvent sort, Integer from, Integer size,
                                 HttpServletRequest servletRequest);
 
     List<EventFullDto> findAll(List<Integer> usersId, List<State> stats, List<Integer> categories, LocalDateTime rangeStart,

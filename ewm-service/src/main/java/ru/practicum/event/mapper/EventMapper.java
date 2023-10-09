@@ -12,6 +12,7 @@ import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.entity.Event;
 import ru.practicum.event.entity.Location;
 import ru.practicum.mapper.ModelMapper;
+import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.user.dto.UserShortDto;
 import ru.practicum.user.entity.User;
 import ru.practicum.user.mapper.UserMapper;
@@ -19,6 +20,7 @@ import ru.practicum.user.mapper.UserMapper;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -95,17 +97,19 @@ public class EventMapper {
                 .initiator(initiator)
                 .createdOn(LocalDateTime.now())
                 .eventDate(LocalDateTime.parse(event.getEventDate(), DateTimeFormatter.ofPattern(TIME_PATTERN)))
+                .requestModeration(event.getRequestModeration())
                 .state(State.PENDING)
                 .title(event.getTitle())
-                .participantLimit(event.getParticipantLimit())
-                .paid(event.getPaid())
-                .requestModeration(event.getRequestModeration())
+                .participantLimit(Objects.nonNull(event.getParticipantLimit()) ? event.getParticipantLimit() : 0)
+                .paid(Objects.nonNull(event.getPaid()) ? event.getPaid() : false)
+                .requestModeration(Objects.nonNull(event.getRequestModeration()) ? event.getRequestModeration() : true)
                 .build();
     }
 
-
-    public List<EventFullDto> toFullDtoList(List<Event> events, Integer views, Integer requests) {
-        return events.stream().map(e -> this.toDtoWithoutLocation(e, views, requests)).collect(Collectors.toList());
+    public List<EventFullDto> toFullDtoList(List<Event> events, Map<Integer, Long> views, Integer requests) {
+        return events.stream().map(e -> this.toDtoWithoutLocation(e, Objects.isNull(views.get(e.getId())) ? 0 :
+                        views.get(e.getId()).intValue(), requests))
+                .collect(Collectors.toList());
     }
 
     public List<EventShortDto> toShortDtoList(List<Event> events) {

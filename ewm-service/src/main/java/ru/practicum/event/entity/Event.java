@@ -44,13 +44,13 @@ public class Event {
     @JoinColumn(name = "location_id")
     private Location location;
 
-    @Column(name = "paid")
+    @Column(name = "paid", nullable = false, columnDefinition = "boolean default false")
     private Boolean paid;
 
-    @Column(name = "request_moderation")
+    @Column(name = "request_moderation", nullable = false, columnDefinition = "boolean default true")
     private Boolean requestModeration;
 
-    @Column(name = "participant_limit")
+    @Column(name = "participant_limit", nullable = false, columnDefinition = "integer default 0")
     private Integer participantLimit;
 
     @Column(name = "published_on")
