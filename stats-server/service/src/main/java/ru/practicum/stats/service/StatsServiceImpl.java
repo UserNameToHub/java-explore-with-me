@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.commonDto.HitDto;
 import ru.practicum.commonDto.HitGettingDto;
-import ru.practicum.stats.entity.EndpointHit;
 import ru.practicum.stats.mapper.HitMapper;
 import ru.practicum.stats.repository.StatsRepository;
 
@@ -27,9 +26,6 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public List<HitGettingDto> getAll(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
-        List<HitGettingDto> allStats = repository.findAllStats(start, end, uris, unique);
-//        boolean b = repository.existsByUriIn(uris);
-        List<EndpointHit> all = repository.findAll();
         return repository.findAllStats(start, end, uris, unique);
     }
 }

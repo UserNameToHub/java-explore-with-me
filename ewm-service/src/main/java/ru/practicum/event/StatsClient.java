@@ -42,12 +42,16 @@ public class StatsClient extends BaseClient {
 
         parameters.put("start", start.format(DateTimeFormatter.ofPattern(TIME_PATTERN)));
         parameters.put("end", end.format(DateTimeFormatter.ofPattern(TIME_PATTERN)));
-        parameters.put("unique", String.valueOf(unique));
+        parameters.put("unique", unique);
 
         String url = "/stats?start={start}&end={end}&unique{unique}";
 
         if (Objects.nonNull(uris)) {
-            parameters.put("uris", uris);
+            if (uris.size() == 1) {
+                parameters.put("uris", uris.get(0));
+            } else {
+                parameters.put("uris", uris);
+            }
             url = "/stats?start={start}&end={end}&uris={uris}&unique{unique}";
         }
 

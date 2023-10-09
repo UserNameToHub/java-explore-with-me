@@ -44,4 +44,4 @@ server:
 
 
 stats-server:
-  url: http://localhost:9090
+  url: http://localhost:9091

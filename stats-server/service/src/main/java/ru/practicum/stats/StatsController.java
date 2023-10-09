@@ -30,7 +30,7 @@ public class StatsController {
     public List<HitGettingDto> getAll(@RequestParam @DateTimeFormat(pattern = TIME_PATTERN) LocalDateTime start,
                                       @RequestParam @DateTimeFormat(pattern = TIME_PATTERN) LocalDateTime end,
                                       @RequestParam(required = false) List<String> uris,
-                                      @RequestParam(defaultValue = "false") boolean unique) {
+                                      @RequestParam(defaultValue = "true") boolean unique) {
         return statsService.getAll(start, end, uris, unique);
     }
 }

@@ -22,7 +22,4 @@ public interface StatsRepository extends JpaRepository<EndpointHit, Long> {
                                      @Param("endDate") LocalDateTime end,
                                      @Param("uris") Collection<String> uris,
                                      @Param("unique") Boolean unique);
-    @Query("select count (h) from EndpointHit as h " +
-            "where h.uri in :uris")
-    boolean existsByUriIn(@Param("uris") Collection<String> uris);
 }
