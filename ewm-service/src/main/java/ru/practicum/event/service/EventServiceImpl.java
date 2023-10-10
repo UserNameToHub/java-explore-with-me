@@ -28,7 +28,6 @@ import ru.practicum.event.model.UpdateEventAdminRequest;
 import ru.practicum.event.model.UpdateEventUserRequest;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.event.repository.LocationRepository;
-import ru.practicum.mapper.ModelMapper;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.entity.Request;
 import ru.practicum.request.repository.RequestRepository;
@@ -55,7 +54,6 @@ public class EventServiceImpl implements EventService {
     private final LocationRepository locationRepository;
     private final UserRepository userRepository;
     private final StatsClient statsClient;
-    private final ModelMapper modelMapper;
     private final EventMapper eventMapper;
     private final LocationMapper locationMapper;
 
@@ -223,7 +221,7 @@ public class EventServiceImpl implements EventService {
         if (Objects.nonNull(newEventDto.getLocation())) {
             Location location = locationRepository.findByLatAndLon(newEventDto.getLocation().getLat(),
                     newEventDto.getLocation().getLon()).orElse(locationRepository.save(
-                    modelMapper.doMapping(newEventDto.getLocation(), Location.builder().build())));
+                    locationMapper.toEntity(newEventDto.getLocation())));
             updatingEvent.setLocation(location);
         }
 
@@ -294,7 +292,7 @@ public class EventServiceImpl implements EventService {
                             categoryEvent.setAccessible(true);
                             categoryEvent.set(event, category);
                         } else if (e.getName().equals("location")) {
-                            Location location = locationRepository.saveAndFlush(modelMapper.doMapping(updateEvent.getLocation(), Location.builder().build()));
+                            Location location = locationRepository.saveAndFlush(locationMapper.toEntity(updateEvent.getLocation()));
                             Field categoryEvent = event.getClass().getDeclaredField("location");
                             categoryEvent.setAccessible(true);
                             categoryEvent.set(event, location);

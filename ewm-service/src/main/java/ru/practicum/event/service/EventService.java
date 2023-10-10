@@ -1,6 +1,5 @@
 package ru.practicum.event.service;
 
-import org.springframework.stereotype.Service;
 import ru.practicum.common.enumiration.SortEvent;
 import ru.practicum.common.enumiration.State;
 import ru.practicum.event.dto.EventFullDto;

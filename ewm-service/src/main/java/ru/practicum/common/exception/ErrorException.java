@@ -19,7 +19,7 @@ public class ErrorException {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     protected ResponseEntity<?> handleException(MethodArgumentNotValidException ex) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
-        log.warn("");
+        log.warn("Throw exception with code {}", ex.getMessage());
         return ResponseEntity
                 .status(status)
                 .body(apiErrorFactory.create(ex, status, "Incorrectly made request."));

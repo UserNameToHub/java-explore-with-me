@@ -2,18 +2,14 @@ package ru.practicum.event.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.practicum.category.Dto.CategoryDto;
 import ru.practicum.category.entity.Category;
+import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.common.enumiration.State;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.dto.LocationDto;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.entity.Event;
 import ru.practicum.event.entity.Location;
-import ru.practicum.mapper.ModelMapper;
-import ru.practicum.request.repository.RequestRepository;
-import ru.practicum.user.dto.UserShortDto;
 import ru.practicum.user.entity.User;
 import ru.practicum.user.mapper.UserMapper;
 
@@ -29,8 +25,9 @@ import static ru.practicum.util.Constants.TIME_PATTERN;
 @Component
 @RequiredArgsConstructor
 public class EventMapper {
-    private final ModelMapper modelMapper;
     private final UserMapper userMapper;
+    private final CategoryMapper categoryMapper;
+    private final LocationMapper locationMapper;
 
     public EventShortDto toShortDto(Event event) {
         return EventShortDto.builder()
@@ -42,17 +39,14 @@ public class EventMapper {
                 .title(event.getTitle())
                 .initiator(userMapper.toShortDto(event.getInitiator()))
                 .build();
-
-
     }
 
     public EventFullDto toDto(Event event, Integer views, Integer requests, Location location) {
         return EventFullDto.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
-                .category(modelMapper.doMapping(event.getCategory(), CategoryDto.builder().build()))
-                .location(Objects.nonNull(location) ? modelMapper.doMapping(location, LocationDto.builder().build()) :
-                        modelMapper.doMapping(event.getLocation(), LocationDto.builder().build()))
+                .category(categoryMapper.toDto(event.getCategory()))
+                .location(Objects.nonNull(location) ? locationMapper.toDto(location) : locationMapper.toDto(event.getLocation()))
                 .createdOn(event.getCreatedOn().toString())
                 .description(event.getDescription())
                 .paid(event.getPaid())
@@ -61,7 +55,7 @@ public class EventMapper {
                 .title(event.getTitle())
                 .requestModeration(event.getRequestModeration())
                 .confirmedRequests(requests)
-                .initiator(modelMapper.doMapping(event.getInitiator(), UserShortDto.builder().build()))
+                .initiator(userMapper.toShortDto(event.getInitiator()))
                 .views(views)
                 .participantLimit(event.getParticipantLimit())
                 .state(event.getState())
@@ -72,8 +66,8 @@ public class EventMapper {
         return EventFullDto.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
-                .category(modelMapper.doMapping(event.getCategory(), CategoryDto.builder().build()))
-                .location(modelMapper.doMapping(event.getLocation(), LocationDto.builder().build()))
+                .category(categoryMapper.toDto(event.getCategory()))
+                .location(locationMapper.toDto(event.getLocation()))
                 .createdOn(event.getCreatedOn().toString())
                 .description(event.getDescription())
                 .paid(event.getPaid())
@@ -81,7 +75,7 @@ public class EventMapper {
                 .eventDate(event.getEventDate())
                 .title(event.getTitle())
                 .confirmedRequests(requests)
-                .initiator(modelMapper.doMapping(event.getInitiator(), UserShortDto.builder().build()))
+                .initiator(userMapper.toShortDto(event.getInitiator()))
                 .views(views)
                 .participantLimit(event.getParticipantLimit())
                 .state(event.getState())

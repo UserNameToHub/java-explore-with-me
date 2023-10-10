@@ -8,11 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.Dto.CategoryDto;
 import ru.practicum.category.Dto.NewCategoryDto;
 import ru.practicum.category.entity.Category;
+import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.common.exception.ConflictException;
 import ru.practicum.common.exception.NotFoundException;
 import ru.practicum.event.repository.EventRepository;
-import ru.practicum.mapper.ModelMapper;
 
 import java.util.List;
 
@@ -25,13 +25,12 @@ import static ru.practicum.util.Constants.ORDER_BY_ID_ASC;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final EventRepository eventRepository;
-    private final ModelMapper modelMapper;
+    private final CategoryMapper categoryMapper;
 
     @Override
     public List<CategoryDto> findAll(Integer from, Integer size) {
         log.info("Get all categories.");
-        return modelMapper.doListMapping(categoryRepository.findAll(PageRequest.of(from, size, ORDER_BY_ID_ASC)).toList(),
-                CategoryDto.class);
+        return categoryMapper.toDtoList(categoryRepository.findAll(PageRequest.of(from, size, ORDER_BY_ID_ASC)).toList());
     }
 
     @Override
@@ -39,16 +38,14 @@ public class CategoryServiceImpl implements CategoryService {
         log.info("Get user with id {}.", id);
         Category category = categoryRepository.findById(id).orElseThrow(() ->
                 new NotFoundException(String.format("Category with id=%d was not found", id)));
-
-        return modelMapper.doMapping(category, CategoryDto.builder().build());
+        return categoryMapper.toDto(category);
     }
 
     @Override
     @Transactional
     public CategoryDto create(NewCategoryDto newCategoryDto) {
         log.info("Creating category with name {}", newCategoryDto.getName());
-        return modelMapper.doMapping(categoryRepository.save(modelMapper.doMapping(newCategoryDto, new Category())),
-                new CategoryDto());
+        return categoryMapper.toDto(categoryRepository.save(categoryMapper.toEntity(newCategoryDto)));
     }
 
     @Override
@@ -76,6 +73,6 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new NotFoundException(String.format("Category with id=%d was not found", id)));
         category.setName(categoryDto.getName());
 
-        return modelMapper.doMapping(categoryRepository.saveAndFlush(category), new CategoryDto());
+        return categoryMapper.toDto(categoryRepository.saveAndFlush(category));
     }
 }

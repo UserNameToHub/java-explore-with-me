@@ -2,6 +2,7 @@ package ru.practicum.category.mapper;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.category.Dto.CategoryDto;
+import ru.practicum.category.Dto.NewCategoryDto;
 import ru.practicum.category.entity.Category;
 import ru.practicum.mapper.BaseMapper;
 
@@ -20,6 +21,12 @@ public class CategoryMapper implements BaseMapper<Category, CategoryDto> {
         return CategoryDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
+                .build();
+    }
+
+    public Category toEntity(NewCategoryDto newCategory) {
+        return Category.builder()
+                .name(newCategory.getName())
                 .build();
     }
 }
