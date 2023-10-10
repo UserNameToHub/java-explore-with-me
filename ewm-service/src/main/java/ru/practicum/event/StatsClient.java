@@ -1,8 +1,8 @@
 package ru.practicum.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
+import org.json.JSONObject;
+import org.json.JSONException;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.client.BaseClient;
 import ru.practicum.event.dto.HitGettingDto;
