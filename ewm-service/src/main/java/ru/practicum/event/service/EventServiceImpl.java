@@ -322,7 +322,7 @@ public class EventServiceImpl implements EventService {
     private boolean checkParticipantLimit(Event event) {
         Integer countConfirmRequests = requestRepository.findConfirmedRequestsCount(event.getId(), State.CONFIRMED);
 
-        if (countConfirmRequests == event.getParticipantLimit()) {
+        if (countConfirmRequests.equals(event.getParticipantLimit())) {
             throw new ConflictException("The participant limit has been reached");
         }
 
