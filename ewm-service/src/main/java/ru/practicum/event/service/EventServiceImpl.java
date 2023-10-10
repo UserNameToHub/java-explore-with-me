@@ -85,7 +85,7 @@ public class EventServiceImpl implements EventService {
         });
 
         if (Objects.nonNull(sort)) {
-            if (sort.equals("VIEWS")) {
+            if (sort.equals(SortEvent.VIEWS)) {
                 eventShortDtos.sort((v1, v2) -> v1.getViews().compareTo(v2.getViews()));
             } else {
                 eventShortDtos.sort((d1, d2) -> d1.getEventDate().compareTo(d2.getEventDate()));
