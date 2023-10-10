@@ -31,12 +31,12 @@ public class PublicEventController {
                                       @RequestParam(value = "paid", required = false) Boolean paid,
                                       @RequestParam(value = "rangeStart", required = false) @DateTimeFormat(pattern = TIME_PATTERN) LocalDateTime rangeStart,
                                       @RequestParam(value = "rangeEnd", required = false) @DateTimeFormat(pattern = TIME_PATTERN) LocalDateTime rangeEnd,
-                                      @RequestParam(value = "onlyAvailable", defaultValue = "false") Boolean RequestParam,
+                                      @RequestParam(value = "requestParam", defaultValue = "false") Boolean requestParam,
                                       @RequestParam(value = "sort", required = false) SortEvent sort,
                                       @RequestParam(value = "from", defaultValue = "0") Integer from,
                                       @RequestParam(value = "size", defaultValue = "10") Integer size,
                                       HttpServletRequest request) {
-        return eventService.findAll(text, categories, paid, rangeStart, rangeEnd, RequestParam, sort, from, size, request);
+        return eventService.findAll(text, categories, paid, rangeStart, rangeEnd, requestParam, sort, from, size, request);
     }
 
     @GetMapping("/{id}")

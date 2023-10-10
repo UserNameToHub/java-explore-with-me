@@ -1127,7 +1127,7 @@
           {
             "description": "только события у которых не исчерпан лимит запросов на участие",
             "in": "query",
-            "name": "onlyAvailable",
+            "name": "requestParam",
             "required": false,
             "schema": {
               "type": "boolean",
