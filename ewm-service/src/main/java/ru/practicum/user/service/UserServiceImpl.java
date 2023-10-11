@@ -35,7 +35,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto create(NewUserRequest newUserDto) {
         log.info("Creating user with name {} and email {}", newUserDto.getName(), newUserDto.getEmail());
-        return userMapper.toDto(userRepository.save(userMapper.toEntity(newUserDto)));
+        var user = userMapper.toEntity(newUserDto);
+        var savedUser = userRepository.save(user);
+        return userMapper.toDto(savedUser);
     }
 
     @Override

@@ -36,10 +36,12 @@ public class Event {
     @Column(name = "event_date")
     private LocalDateTime eventDate;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User initiator;
 
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id")
     private Location location;

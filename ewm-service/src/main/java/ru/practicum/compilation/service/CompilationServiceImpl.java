@@ -13,7 +13,6 @@ import ru.practicum.compilation.dto.UpdateCompilationRequest;
 import ru.practicum.compilation.entity.Compilation;
 import ru.practicum.compilation.mapper.CompilationMapper;
 import ru.practicum.compilation.repository.CompilationRepository;
-import ru.practicum.event.entity.Event;
 import ru.practicum.event.repository.EventRepository;
 
 import java.util.*;
@@ -34,15 +33,17 @@ public class CompilationServiceImpl implements CompilationService {
     @Transactional
     public CompilationDto create(NewCompilationDto newCompilation) {
         log.info("Creating compilation with pinned {} and title {}", newCompilation.getPinned(), newCompilation.getTitle());
-        return compilationMapper.toDto(compilationRepository.save(compilationMapper.toEntity(newCompilation)));
+        var entity = compilationMapper.toEntity(newCompilation);
+        var savedEntity = compilationRepository.save(entity);
+        return compilationMapper.toDto(savedEntity);
     }
 
     @Override
     @Transactional
     public void delete(Integer id) {
         log.info("Deleting compilation with id {}", id);
-        compilationRepository.delete(compilationRepository.findById(id).orElseThrow(() ->
-                new NotFoundException(String.format("Compilation with id=%d was not found", id))));
+        compilationRepository.findById(id).ifPresentOrElse(compilationRepository::delete, () ->
+                new NotFoundException(String.format("Compilation with id=%d was not found", id)));
     }
 
     @Override
@@ -52,11 +53,10 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationRepository.findById(compId).orElseThrow(() ->
                 new NotFoundException(String.format("Compilation with id=%d was not found", compId)));
 
-        var events = Objects.nonNull(updateCompilation.getEvents()) ?
-                updateCompilation.getEvents().stream()
-                        .map(eventRepository::findById)
-                        .map(Optional::get)
-                        .collect(Collectors.toList()) : new ArrayList<Event>();
+        var events = Optional.ofNullable(updateCompilation.getEvents()).orElse(Set.of()).stream()
+                .map(eventRepository::findById)
+                .map(Optional::get)
+                .collect(Collectors.toList());
 
         ReflectionChange.go(compilation, updateCompilation);
         compilation.setEvents(events);
