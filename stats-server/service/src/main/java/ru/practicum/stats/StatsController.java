@@ -9,6 +9,8 @@ import ru.practicum.commonDto.HitDto;
 import ru.practicum.commonDto.HitGettingDto;
 import ru.practicum.stats.service.StatsService;
 
+import javax.validation.constraints.Future;
+import javax.validation.constraints.FutureOrPresent;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,7 +32,7 @@ public class StatsController {
     public List<HitGettingDto> getAll(@RequestParam @DateTimeFormat(pattern = TIME_PATTERN) LocalDateTime start,
                                       @RequestParam @DateTimeFormat(pattern = TIME_PATTERN) LocalDateTime end,
                                       @RequestParam(required = false) List<String> uris,
-                                      @RequestParam(defaultValue = "true") boolean unique) {
+                                      @RequestParam(defaultValue = "false") boolean unique) {
         return statsService.getAll(start, end, uris, unique);
     }
 }

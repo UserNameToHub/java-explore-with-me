@@ -71,8 +71,7 @@ public class EventServiceImpl implements EventService {
         List<EventShortDto> eventShortDtos = eventMapper.toShortDtoList(events);
 
         List<String> uris = getUris(eventShortDtos);
-
-        Map<Integer, Long> views = getViews(eventShortDtos, START_DATE, END_DATE);
+        Map<Integer, Long> views = getViews(eventShortDtos, rangeStart, rangeEnd);
 
         eventShortDtos.stream().forEach(e -> {
             Long view = views.get(e.getId());
@@ -80,6 +79,7 @@ public class EventServiceImpl implements EventService {
             e.setConfirmedRequests(requestRepository.findConfirmedRequestsCount(e.getId(), State.CONFIRMED));
         });
 
+        statsClient.create("ewm-service", "/events", servletRequest.getRemoteAddr(), LocalDateTime.now());
         uris.stream().forEach(e -> {
             statsClient.create("ewm-service", e, servletRequest.getRemoteAddr(), LocalDateTime.now());
         });
@@ -126,10 +126,9 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findByIdAndStateIs(id, state).orElseThrow(() ->
                 new NotFoundException(String.format("Event with id=%d was not found", id)));
 
-        statsClient.create("ewm-service", "/events/" + id, servletRequest.getRemoteAddr(), LocalDateTime.now());
-
         Integer confirmedRequestsCount = requestRepository.findConfirmedRequestsCount(event.getId(), State.CONFIRMED);
         Map<Integer, Long> views = getViews(List.of(eventMapper.toShortDto(event)), START_DATE, END_DATE);
+        statsClient.create("ewm-service", "/events/" + id, servletRequest.getRemoteAddr(), LocalDateTime.now());
         return eventMapper.toDtoWithoutLocation(event, views.isEmpty() ? 0 : views.get(event.getId()).intValue(), confirmedRequestsCount);
     }
 

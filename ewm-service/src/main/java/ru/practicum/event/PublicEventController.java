@@ -1,7 +1,6 @@
 package ru.practicum.event;
 
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +20,6 @@ import static ru.practicum.util.Constants.TIME_PATTERN;
 @RequestMapping("/events")
 @AllArgsConstructor
 public class PublicEventController {
-    @Autowired
     private final EventService eventService;
 
     @GetMapping

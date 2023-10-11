@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static ru.practicum.util.Constants.TIME_PATTERN;
+import static ru.practicum.util.Constants.*;
 
 public class StatsClient extends BaseClient {
     public StatsClient(RestTemplate rest) {
@@ -40,19 +40,21 @@ public class StatsClient extends BaseClient {
         Map<String, Object> parameters = new HashMap<>();
         ObjectMapper mapper = new ObjectMapper();
 
-        parameters.put("start", start.format(DateTimeFormatter.ofPattern(TIME_PATTERN)));
-        parameters.put("end", end.format(DateTimeFormatter.ofPattern(TIME_PATTERN)));
+        parameters.put("start", Objects.nonNull(start) ? start.format(DateTimeFormatter.ofPattern(TIME_PATTERN)) :
+                START_DATE.format(DateTimeFormatter.ofPattern(TIME_PATTERN)));
+        parameters.put("end", Objects.nonNull((end)) ? end.format(DateTimeFormatter.ofPattern(TIME_PATTERN)) :
+                END_DATE.format(DateTimeFormatter.ofPattern(TIME_PATTERN)));
         parameters.put("unique", unique);
 
-        String url = "/stats?start={start}&end={end}&unique{unique}";
+        String url = "/stats?start={start}&end={end}&unique={unique}";
 
         if (Objects.nonNull(uris)) {
             if (uris.size() == 1) {
                 parameters.put("uris", uris.get(0));
             } else {
-                parameters.put("uris", uris);
+                parameters.put("uris", uris.toArray());
             }
-            url = "/stats?start={start}&end={end}&uris={uris}&unique{unique}";
+            url = "/stats?start={start}&end={end}&uris={uris}&unique={unique}";
         }
 
         List<Object> objects = get(url, parameters, Object.class).getBody();

@@ -17,18 +17,19 @@ import java.util.List;
 @Slf4j
 public class StatsController {
     private final StatsService statsService;
-    private final StatsClient statsClient;
 
     @PostMapping("/hit")
-    public ResponseEntity<String> create(@RequestBody @Valid HitDto shortHit) {
-        return statsClient.create(statsService.create(shortHit));
+    @ResponseStatus(HttpStatus.CREATED)
+    public String create(@RequestBody @Valid HitDto shortHit) {
+        return statsService.create(shortHit);
     }
 
     @GetMapping("/stats")
-    public ResponseEntity<List<HitGettingDto>> getAll(@RequestParam String start,
-                                                      @RequestParam String end,
-                                                      @RequestParam(required = false) List<String> uris,
-                                                      @RequestParam(defaultValue = "true") boolean unique) {
-        return statsClient.getAll(start, end, uris, unique);
+    @ResponseStatus(HttpStatus.OK)
+    public List<HitGettingDto> getAll(@RequestParam String start,
+                                      @RequestParam String end,
+                                      @RequestParam(required = false) List<String> uris,
+                                      @RequestParam(defaultValue = "false") boolean unique) {
+        return statsService.getAll(start, end, uris, unique);
     }
 }

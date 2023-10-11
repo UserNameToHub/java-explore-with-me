@@ -26,15 +26,15 @@ public class StatsClient extends BaseClient {
         parameters.put("end", end);
         parameters.put("unique", unique);
 
-        String url = "/stats?start={start}&end={end}&unique{unique}";
+        String url = "/stats?start={start}&end={end}&unique={unique}";
 
         if (Objects.nonNull(uris)) {
             if (uris.size() == 1) {
                 parameters.put("uris", uris.get(0));
             } else {
-                parameters.put("uris", uris);
+                parameters.put("uris", uris.toArray());
             }
-            url = "/stats?start={start}&end={end}&uris={uris}&unique{unique}";
+            url = "/stats?start={start}&end={end}&uris={uris}&unique={unique}";
 
         }
 
