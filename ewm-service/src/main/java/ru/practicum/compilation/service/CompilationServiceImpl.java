@@ -42,8 +42,9 @@ public class CompilationServiceImpl implements CompilationService {
     @Transactional
     public void delete(Integer id) {
         log.info("Deleting compilation with id {}", id);
-        compilationRepository.findById(id).ifPresentOrElse(compilationRepository::delete, () ->
-                new NotFoundException(String.format("Compilation with id=%d was not found", id)));
+        compilationRepository.findById(id).ifPresentOrElse(compilationRepository::delete, () -> {
+            throw new NotFoundException(String.format("Compilation with id=%d was not found", id));
+        });
     }
 
     @Override
