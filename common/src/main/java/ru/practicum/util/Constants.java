@@ -16,4 +16,5 @@ public class Constants {
     public static final String REASON_NOT_FOUND = "The required object was not found.";
     public static final String REASON_BED_REQUEST = "Incorrectly made request.";
     public static final String REASON_CONFLICT = "Integrity constraint has been violated.";
+    public static final Integer TIME_EDITING = 24;
 }
