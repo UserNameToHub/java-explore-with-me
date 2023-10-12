@@ -23,13 +23,13 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "user_id")
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     @ToString.Exclude
     private User owner;
 
-    @Column(name = "event_id")
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id")
     @ToString.Exclude
     private Event event;
 

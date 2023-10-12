@@ -20,7 +20,7 @@ public interface RequestRepository extends JpaRepository<Request, Integer> {
 
     boolean existsByEventIsAndCreatedIs(Integer eventId, Integer userId);
 
-    boolean existsByEventIdAndRequesterIdAAndStatusIs(Integer eventId, Integer userId, State state);
+    boolean existsByEventIdAndRequesterIdAndStatusIs(Integer eventId, Integer userId, State state);
 
     @Query("select r from Request as r " +
             "join r.event as e " +

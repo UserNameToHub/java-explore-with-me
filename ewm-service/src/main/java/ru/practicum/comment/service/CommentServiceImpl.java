@@ -34,7 +34,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentFullDto create(CommentDto newComment, Integer userId, Integer eventId) {
         log.info("Create comment for event with id {} from user with {}", eventId, userId);
-        if (requestRepository.existsByEventIdAndRequesterIdAAndStatusIs(userId, eventId, State.CONFIRMED)) {
+        if (requestRepository.existsByEventIdAndRequesterIdAndStatusIs(userId, eventId, State.CONFIRMED)) {
             throw new ConflictException(String.format("User with id d% is not a participant in the event with id %d",
                     userId, eventId));
         }
@@ -61,7 +61,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findById(commentId).orElseThrow(() ->
                 new ConflictException(String.format("Comment with id %d is not found.")));
 
-        if (!commentRepository.existsByIdAAndOwnerId(commentId, userId)) {
+        if (!commentRepository.existsByIdAndOwnerId(commentId, userId)) {
             throw new ConflictException(String.format("User with id %d is not a owner for comment with id %d.",
                     userId, commentId));
         }
@@ -83,7 +83,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void delete(Integer userId, Integer commentId) {
         log.info("Owner with id {} delete comment with id {}", userId, commentId);
-        if (!commentRepository.existsByIdAAndOwnerId(commentId, userId)) {
+        if (!commentRepository.existsByIdAndOwnerId(commentId, userId)) {
             throw new ConflictException(String.format("User with id %d is not a owner for comment with id %d.",
                     userId, commentId));
         }

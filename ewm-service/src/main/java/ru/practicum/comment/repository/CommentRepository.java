@@ -7,7 +7,7 @@ import ru.practicum.common.enumiration.State;
 import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
-    boolean existsByIdAAndOwnerId(Integer commentId, Integer userId);
+    boolean existsByIdAndOwnerId(Integer commentId, Integer userId);
 
     List<Comment> findAllByEventIdAndStateIs(Integer commentId, State state);
 }
