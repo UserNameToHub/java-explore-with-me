@@ -7,7 +7,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-import static ru.practicum.util.Constatns.TIME_PATTERN;
+import static ru.practicum.util.Constants.TIME_PATTERN;
 
 
 @Data

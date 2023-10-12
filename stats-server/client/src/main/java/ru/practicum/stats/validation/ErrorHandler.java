@@ -20,4 +20,12 @@ public class ErrorHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("errorMessage", ex.getMessage()));
     }
+
+    @ExceptionHandler(WrongDateException.class)
+    protected ResponseEntity<?> handleException(WrongDateException ex, WebRequest request) {
+        log.warn(ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("errorMessage", ex.getMessage()));
+    }
 }

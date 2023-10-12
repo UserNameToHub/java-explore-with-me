@@ -9,6 +9,7 @@ import ru.practicum.commonDto.HitGettingDto;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class StatsClient extends BaseClient {
     public StatsClient(RestTemplate restTemplate) {
@@ -25,11 +26,15 @@ public class StatsClient extends BaseClient {
         parameters.put("end", end);
         parameters.put("unique", unique);
 
-        String url = "/stats?start={start}&end={end}&unique{unique}";
+        String url = "/stats?start={start}&end={end}&unique={unique}";
 
-        if (uris != null) {
-            parameters.put("uris", uris);
-            url = "/stats?start={start}&end={end}&uris={uris}&unique{unique}";
+        if (Objects.nonNull(uris)) {
+            if (uris.size() == 1) {
+                parameters.put("uris", uris.get(0));
+            } else {
+                parameters.put("uris", uris.toArray());
+            }
+            url = "/stats?start={start}&end={end}&uris={uris}&unique={unique}";
 
         }
 
