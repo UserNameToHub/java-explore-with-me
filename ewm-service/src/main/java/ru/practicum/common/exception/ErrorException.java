@@ -2,6 +2,8 @@ package ru.practicum.common.exception;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +16,9 @@ import ru.practicum.common.exception.factory.ApiErrorFactory;
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class ErrorException {
-    private final ApiErrorFactory apiErrorFactory;
+
+//    @Qualifier("ApiError")
+//    private final ApiErrorFactory apiErrorFactory;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     protected ResponseEntity<?> handleException(MethodArgumentNotValidException ex) {
@@ -22,7 +26,7 @@ public class ErrorException {
         log.warn("Throw exception with code {}", ex.getMessage());
         return ResponseEntity
                 .status(status)
-                .body(apiErrorFactory.create(ex, status, "Incorrectly made request."));
+                .body(new ApiErrorFactory().create(ex, status, "Incorrectly made request."));
     }
 
     @ExceptionHandler(MyException.class)
@@ -30,7 +34,7 @@ public class ErrorException {
         log.warn("Throw exception with code {} and message {}", ex.getStatus(), ex.getMessage());
         return ResponseEntity
                 .status(ex.getStatus())
-                .body(apiErrorFactory.create(ex, ex.getStatus(), ex.getReason()));
+                .body(new ApiErrorFactory().create(ex, ex.getStatus(), ex.getReason()));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -39,7 +43,7 @@ public class ErrorException {
         log.warn("Throw exception with code {}", ex.getMessage());
         return ResponseEntity
                 .status(status)
-                .body(apiErrorFactory.create(ex, status, "Integrity constraint has been violated."));
+                .body(new ApiErrorFactory().create(ex, status, "Integrity constraint has been violated."));
     }
 
     @ExceptionHandler(ConflictException.class)
@@ -48,7 +52,7 @@ public class ErrorException {
         log.warn("Throw exception with code {}", ex.getMessage());
         return ResponseEntity
                 .status(status)
-                .body(apiErrorFactory.create(ex, status, "Integrity constraint has been violated"));
+                .body(new ApiErrorFactory().create(ex, status, "Integrity constraint has been violated"));
     }
 
     @ExceptionHandler(NotFoundException.class)
@@ -58,6 +62,6 @@ public class ErrorException {
         log.warn("");
         return ResponseEntity
                 .status(status)
-                .body(apiErrorFactory.create(ex, status, "The required object was not found."));
+                .body(new ApiErrorFactory().create(ex, status, "The required object was not found."));
     }
 }

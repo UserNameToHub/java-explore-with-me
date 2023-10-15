@@ -9,5 +9,5 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
     boolean existsByIdAndOwnerId(Integer commentId, Integer userId);
 
-    List<Comment> findAllByEventIdAndStateIs(Integer commentId, State state);
+    List<Comment> findAllByEventIdAndStateIs(Integer eventId, State state);
 }

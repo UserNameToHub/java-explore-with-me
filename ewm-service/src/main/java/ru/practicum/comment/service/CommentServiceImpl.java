@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.comment.dto.CommentFullDto;
 import ru.practicum.comment.dto.CommentDto;
+import ru.practicum.comment.dto.EventCommentDto;
 import ru.practicum.comment.entity.Comment;
 import ru.practicum.comment.mapper.CommentMapper;
 import ru.practicum.comment.repository.CommentRepository;
@@ -18,6 +19,7 @@ import ru.practicum.user.entity.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static ru.practicum.util.Constants.TIME_EDITING;
 
@@ -34,16 +36,16 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentFullDto create(CommentDto newComment, Integer userId, Integer eventId) {
         log.info("Create comment for event with id {} from user with {}", eventId, userId);
-        if (requestRepository.existsByEventIdAndRequesterIdAndStatusIs(userId, eventId, State.CONFIRMED)) {
-            throw new ConflictException(String.format("User with id d% is not a participant in the event with id %d",
+        if (!requestRepository.existsByEventIdAndRequesterIdAndStatusIs(userId, eventId, State.CONFIRMED)) {
+            throw new ConflictException(String.format("User with id %d is not a participant in the event with id %d",
                     userId, eventId));
         }
 
         Event event = eventRepository.findByIdAndEventDateBefore(eventId, LocalDateTime.now()).orElseThrow(() ->
-                new ConflictException(String.format("Event with id %id is not over yet.", eventId)));
+                new ConflictException(String.format("Event with id %d is not over yet.", eventId)));
 
         User user = userRepository.findById(userId).orElseThrow(() ->
-                new ConflictException(String.format("User with id %d is not found&")));
+                new ConflictException(String.format("User with id %d is not found.", userId)));
 
         Comment comment = commentMapper.toEntity(newComment, user, event);
         Comment savedComment = commentRepository.save(comment);
@@ -55,21 +57,21 @@ public class CommentServiceImpl implements CommentService {
     public CommentFullDto update(CommentDto updateComment, Integer userId, Integer commentId) {
         log.info("Owner with id {} update comment with id {}", userId, commentId);
         if (!userRepository.existsById(userId)) {
-            throw new ConflictException(String.format("User with id %d is not found."));
+            throw new ConflictException(String.format("User with id %d is not found.", userId));
         }
 
         Comment comment = commentRepository.findById(commentId).orElseThrow(() ->
-                new ConflictException(String.format("Comment with id %d is not found.")));
+                new ConflictException(String.format("Comment with id %d is not found.", commentId)));
 
         if (!commentRepository.existsByIdAndOwnerId(commentId, userId)) {
             throw new ConflictException(String.format("User with id %d is not a owner for comment with id %d.",
                     userId, commentId));
         }
 
-        LocalDateTime eventDate = comment.getEvent().getEventDate();
+        LocalDateTime eventDate = comment.getPublishedOn();
         LocalDateTime endEditing = eventDate.plusHours(TIME_EDITING);
 
-        if (endEditing.isAfter(LocalDateTime.now())) {
+        if (endEditing.isBefore(LocalDateTime.now())) {
             throw new ConflictException(String.format("Edit time is over."));
         }
 
@@ -101,5 +103,19 @@ public class CommentServiceImpl implements CommentService {
         Comment savedComment = commentRepository.saveAndFlush(comment);
 
         return commentMapper.toDto(savedComment, null, null);
+    }
+
+    @Override
+    public EventCommentDto getAll(Integer userId, Integer eventId) {
+        if (!userRepository.existsById(userId)) {
+            throw new ConflictException(String.format("User with id %d is not found."));
+        }
+
+        Event event = eventRepository.findByIdAndEventDateBefore(eventId, LocalDateTime.now()).orElseThrow(() ->
+                new ConflictException(String.format("Event with id %id is not over yet.", eventId)));
+
+        List<Comment> comments = commentRepository.findAllByEventIdAndStateIs(eventId, State.CONFIRMED);
+
+        return commentMapper.toEventComments(event, comments);
     }
 }

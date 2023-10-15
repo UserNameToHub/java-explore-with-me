@@ -2,10 +2,13 @@ package ru.practicum.comment;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.comment.dto.CommentFullDto;
 import ru.practicum.comment.dto.CommentDto;
+import ru.practicum.comment.dto.EventCommentDto;
 import ru.practicum.comment.service.CommentService;
+import ru.practicum.common.validation.validationGroup.Create;
 
 @RestController
 @RequestMapping("/users/{userId}/comments")
@@ -15,7 +18,7 @@ public class PrivateCommentController {
 
     @PostMapping("/{eventId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public CommentFullDto create(@RequestBody CommentDto newComment,
+    public CommentFullDto create(@Validated(Create.class) @RequestBody CommentDto newComment,
                                  @PathVariable("userId") Integer userId,
                                  @PathVariable("eventId") Integer eventId) {
         return commentService.create(newComment, userId, eventId);
@@ -34,5 +37,11 @@ public class PrivateCommentController {
     public void delete(@PathVariable("userId") Integer userId,
                        @PathVariable("commentId") Integer commentId) {
         commentService.delete(userId, commentId);
+    }
+
+    @GetMapping("{eventId}")
+    public EventCommentDto getAll(@PathVariable("userId") Integer userId,
+                                  @PathVariable("eventId") Integer eventId) {
+        return commentService.getAll(userId, eventId);
     }
 }

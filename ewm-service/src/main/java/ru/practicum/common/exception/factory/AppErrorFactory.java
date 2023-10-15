@@ -1,6 +1,7 @@
 package ru.practicum.common.exception.factory;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import ru.practicum.common.exception.model.ApplicationError;
 
 public abstract class AppErrorFactory {

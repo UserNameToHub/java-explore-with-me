@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 
 import static ru.practicum.util.Constants.TIME_PATTERN;
 
-@Component
+//@Component("ApiError")
 public class ApiErrorFactory extends AppErrorFactory {
     @Override
     protected <T extends Exception> ApiError createAppError(T rex, HttpStatus responseCode, String reason) {
