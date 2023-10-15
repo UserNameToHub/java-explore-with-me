@@ -97,7 +97,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentFullDto update(Integer commentId, State state) {
         log.info("Admin update comment with id {}", commentId);
         Comment comment = commentRepository.findById(commentId).orElseThrow(() ->
-                new ConflictException(String.format("Comment with id %d is not found.")));
+                new ConflictException(String.format("Comment with id %d is not found.", commentId)));
 
         comment.setState(state);
         Comment savedComment = commentRepository.saveAndFlush(comment);
@@ -108,11 +108,11 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public EventCommentDto getAll(Integer userId, Integer eventId) {
         if (!userRepository.existsById(userId)) {
-            throw new ConflictException(String.format("User with id %d is not found."));
+            throw new ConflictException(String.format("User with id %d is not found.", userId));
         }
 
         Event event = eventRepository.findByIdAndEventDateBefore(eventId, LocalDateTime.now()).orElseThrow(() ->
-                new ConflictException(String.format("Event with id %id is not over yet.", eventId)));
+                new ConflictException(String.format("Event with id %d is not over yet.", eventId)));
 
         List<Comment> comments = commentRepository.findAllByEventIdAndStateIs(eventId, State.CONFIRMED);
 
