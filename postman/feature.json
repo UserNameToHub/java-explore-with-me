@@ -444,7 +444,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/users/:userId/requests?eventId={{eid}}",
+							"raw": "{{baseUrl}}/users/:userId/requests?eventId=0",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -456,7 +456,7 @@
 							"query": [
 								{
 									"key": "eventId",
-									"value": "{{eid}}",
+									"value": "0",
 									"description": "(Required) id события"
 								}
 							],
