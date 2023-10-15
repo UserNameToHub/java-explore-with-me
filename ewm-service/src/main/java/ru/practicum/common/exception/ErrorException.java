@@ -2,8 +2,6 @@ package ru.practicum.common.exception;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +14,6 @@ import ru.practicum.common.exception.factory.ApiErrorFactory;
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class ErrorException {
-
-//    @Qualifier("ApiError")
-//    private final ApiErrorFactory apiErrorFactory;
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     protected ResponseEntity<?> handleException(MethodArgumentNotValidException ex) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
