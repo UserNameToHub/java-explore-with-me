@@ -23,7 +23,7 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
 
     Optional<Event> findByIdAndStateIs(Integer id, State state);
 
-    Optional <Event> findByIdAndEventDateBefore(Integer eventId, LocalDateTime now);
+    Optional<Event> findByIdAndEventDateBefore(Integer eventId, LocalDateTime now);
 
     @Query("select e from Event as e " +
             "join e.category as c " +
