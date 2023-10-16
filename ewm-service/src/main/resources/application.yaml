@@ -4,6 +4,9 @@ server:
 ewm-server:
   url: ${EWM_SERVER_URL}
 
+time:
+  editing:
+
 spring:
     jpa:
       properties:

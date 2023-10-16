@@ -20,12 +20,10 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class CommentMapper implements EntityMapper<Comment, CommentDto, User, Event>,
-        DtoMapper<CommentFullDto, Comment, Object, Object> {
+public class CommentMapper {
     private final UserMapper userMapper;
     private final EventMapper eventMapper;
 
-    @Override
     public Comment toEntity(CommentDto type, User fElement, Event sElement) {
         return Comment.builder()
                 .owner(fElement)
@@ -37,8 +35,7 @@ public class CommentMapper implements EntityMapper<Comment, CommentDto, User, Ev
                 .build();
     }
 
-    @Override
-    public CommentFullDto toDto(Comment type, Object fElement, Object sElement) {
+    public CommentFullDto toDto(Comment type) {
         return CommentFullDto.builder()
                 .id(type.getId())
                 .publishedOn(type.getPublishedOn())

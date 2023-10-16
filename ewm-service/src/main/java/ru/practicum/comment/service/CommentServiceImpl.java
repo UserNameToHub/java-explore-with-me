@@ -2,6 +2,7 @@ package ru.practicum.comment.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.practicum.comment.dto.CommentFullDto;
 import ru.practicum.comment.dto.CommentDto;
@@ -21,8 +22,6 @@ import ru.practicum.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static ru.practicum.util.Constants.TIME_EDITING;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,6 +31,9 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
     private final UserRepository userRepository;
+
+    @Value("${time.editing}")
+    private Integer timeEditing = 24;
 
     @Override
     public CommentFullDto create(CommentDto newComment, Integer userId, Integer eventId) {
@@ -50,7 +52,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentMapper.toEntity(newComment, user, event);
         Comment savedComment = commentRepository.save(comment);
 
-        return commentMapper.toDto(savedComment, null, null);
+        return commentMapper.toDto(savedComment);
     }
 
     @Override
@@ -69,7 +71,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         LocalDateTime eventDate = comment.getPublishedOn();
-        LocalDateTime endEditing = eventDate.plusHours(TIME_EDITING);
+        LocalDateTime endEditing = eventDate.plusHours(timeEditing);
 
         if (endEditing.isBefore(LocalDateTime.now())) {
             throw new ConflictException(String.format("Edit time is over."));
@@ -79,7 +81,7 @@ public class CommentServiceImpl implements CommentService {
         updatedComment.setState(State.PENDING);
         Comment savedComment = commentRepository.saveAndFlush(updatedComment);
 
-        return commentMapper.toDto(savedComment, null, null);
+        return commentMapper.toDto(savedComment);
     }
 
     @Override
@@ -102,7 +104,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setState(state);
         Comment savedComment = commentRepository.saveAndFlush(comment);
 
-        return commentMapper.toDto(savedComment, null, null);
+        return commentMapper.toDto(savedComment);
     }
 
     @Override
