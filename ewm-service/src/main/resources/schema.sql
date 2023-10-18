@@ -35,9 +35,9 @@ create table if not exists events
     event_date         TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     user_id            INTEGER                     NOT NULL REFERENCES users (id),
     location_Id        INTEGER                     NOT NULL REFERENCES locations (id),
-    paid               BOOLEAN DEFAULT FALSE,
-    participant_limit  INTEGER DEFAULT 0,
-    request_moderation BOOLEAN DEFAULT TRUE,
+    paid               BOOLEAN                     DEFAULT FALSE,
+    participant_limit  INTEGER                     DEFAULT 0,
+    request_moderation BOOLEAN                     DEFAULT TRUE,
     published_on       TIMESTAMP WITHOUT TIME ZONE,
     state              VARCHAR,
     title              VARCHAR                     NOT NULL,
@@ -58,4 +58,16 @@ create table if not exists compilation_events
     compilation_id INTEGER REFERENCES compilations (id) NOT NULL,
     event_id       INTEGER REFERENCES events (id)       NOT NULL,
     PRIMARY KEY (compilation_id, event_id)
+);
+
+create table if not exists comments
+(
+    id           INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id      INTEGER NOT NULL REFERENCES users (id),
+    event_id      INTEGER NOT NULL REFERENCES events (id),
+    created_on   TIMESTAMP WITHOUT TIME ZONE DEFAULT (now()),
+    published_on TIMESTAMP WITHOUT TIME ZONE,
+    text         VARCHAR(500),
+    is_positive  BOOLEAN NOT NULL,
+    state        VARCHAR
 );

@@ -4,6 +4,9 @@ server:
 ewm-server:
   url: ${EWM_SERVER_URL}
 
+time:
+  editing:
+
 spring:
     jpa:
       properties:
@@ -20,15 +23,3 @@ spring:
       url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
       username: ${POSTGRES_USER}
       password: ${POSTGRES_PASSWORD}
-
-#    datasource:
-#      driver-class-name: org.postgresql.Driver
-#      url: jdbc:postgresql://localhost:5432/postgres
-#      username: postgres
-#      password: postgres
-#
-#server:
-#  port: 8080
-#
-#stats-server:
-#  url: http://localhost:9090
